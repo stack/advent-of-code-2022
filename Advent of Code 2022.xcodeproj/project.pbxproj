@@ -91,6 +91,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D195B3F8291C5F350045CD79 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DC05ED8C2914505A004FF9ED /* Utilities.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utilities.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC05ED8E2914505A004FF9ED /* Utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		DC05ED932914505A004FF9ED /* Utilities Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Utilities Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -195,6 +196,7 @@
 		DC54E1A02913EF3900C718F3 = {
 			isa = PBXGroup;
 			children = (
+				D195B3F8291C5F350045CD79 /* README.md */,
 				DC05ED8D2914505A004FF9ED /* Utilities */,
 				DC05ED972914505A004FF9ED /* Utilities Tests */,
 				DC05EDB42914525D004FF9ED /* Visualization */,
