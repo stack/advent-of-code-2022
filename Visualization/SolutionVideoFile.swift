@@ -22,7 +22,7 @@ struct SolutionVideoFile: FileDocument {
     }
     
     init(configuration: ReadConfiguration) throws {
-        throw AdventOfCodeError.apiError("Cannot init with read configuration")
+        throw SolutionError.apiError("Cannot init with read configuration")
     }
     
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {

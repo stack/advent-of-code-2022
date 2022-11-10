@@ -97,16 +97,16 @@ open class SolutionContext: ObservableObject {
         let writerAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: writerInput, sourcePixelBufferAttributes: sourceAttributes)
         
         guard writer.canAdd(writerInput) else {
-            throw AdventOfCodeError.apiError("Cannot add input to writer")
+            throw SolutionError.apiError("Cannot add input to writer")
         }
 
         writer.add(writerInput)
         
         guard writer.startWriting() else {
             if let error = writer.error {
-                throw AdventOfCodeError.wrapped("Could not start writing", error)
+                throw SolutionError.wrapped("Could not start writing", error)
             } else {
-                throw AdventOfCodeError.apiError("Could not start writing for an unknown reason")
+                throw SolutionError.apiError("Could not start writing for an unknown reason")
             }
         }
         
@@ -147,9 +147,9 @@ open class SolutionContext: ObservableObject {
             writer.finishWriting {
                 if writer.status == .failed {
                     if let error = writer.error {
-                        continuation.resume(throwing: AdventOfCodeError.wrapped("Failed to finish writing", error))
+                        continuation.resume(throwing: SolutionError.wrapped("Failed to finish writing", error))
                     } else {
-                        continuation.resume(throwing: AdventOfCodeError.apiError("Failed to finish writing for an unknown reason"))
+                        continuation.resume(throwing: SolutionError.apiError("Failed to finish writing for an unknown reason"))
                     }
                 } else {
                     continuation.resume(returning: ())
@@ -164,14 +164,14 @@ open class SolutionContext: ObservableObject {
     
     public func nextContext() throws -> (CGContext, CVPixelBuffer) {
         guard let pool = writerAdaptor?.pixelBufferPool else {
-            throw AdventOfCodeError.apiError("No pixel buffer pool available")
+            throw SolutionError.apiError("No pixel buffer pool available")
         }
         
         var pixelBuffer: CVPixelBuffer? = nil
         CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &pixelBuffer)
         
         guard let pixelBuffer else {
-            throw AdventOfCodeError.apiError("Pixel buffer pool is out of pixel buffers")
+            throw SolutionError.apiError("Pixel buffer pool is out of pixel buffers")
         }
         
         CVPixelBufferLockBaseAddress(pixelBuffer, [])
@@ -192,7 +192,7 @@ open class SolutionContext: ObservableObject {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue + CGBitmapInfo.byteOrder32Little.rawValue
         ) else {
-            throw AdventOfCodeError.apiError("Failed to create context from pixel buffer")
+            throw SolutionError.apiError("Failed to create context from pixel buffer")
         }
         
         context.setAllowsFontSmoothing(true)
@@ -283,6 +283,6 @@ open class SolutionContext: ObservableObject {
     // MARK: - Running
     
     open func run() async throws {
-        throw AdventOfCodeError.apiError("Subclasses must implement their own run method")
+        throw SolutionError.apiError("Subclasses must implement their own run method")
     }
 }
