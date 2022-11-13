@@ -12,10 +12,6 @@ import MetalKit
 
 fileprivate let MaxOutstandingFrameCount = 3
 
-fileprivate func align(_ value: Int, upTo alignment: Int) -> Int {
-    return ((value + alignment - 1) / alignment) * alignment
-}
-
 class SolutionRenderer {
     
     private struct Vertex {

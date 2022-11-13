@@ -10,7 +10,7 @@ import Foundation
 import QuartzCore
 import Visualization
 
-class VisualizationTestingContext: SolutionContext {
+class VisualizationTestingContext: Solution2DContext {
     
     override var name: String {
         "Visualization Testing"
