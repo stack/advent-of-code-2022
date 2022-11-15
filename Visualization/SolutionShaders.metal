@@ -98,24 +98,6 @@ vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
     return out;
 }
 
-static float shadow(float3 worldPosition,
-                    depth2d<float, access::sample> depthMap,
-                    constant float4x4 &viewProjectionMatrix)
-{
-    float4 shadowNDC = (viewProjectionMatrix * float4(worldPosition, 1));
-    shadowNDC.xyz /= shadowNDC.w;
-    float2 shadowCoords = shadowNDC.xy * 0.5 + 0.5;
-    shadowCoords.y = 1 - shadowCoords.y;
-
-    constexpr sampler shadowSampler(coord::normalized,
-                                    address::clamp_to_edge,
-                                    filter::linear,
-                                    compare_func::greater_equal);
-    float depthBias = 5e-3f;
-    float shadowCoverage = depthMap.sample_compare(shadowSampler, shadowCoords, shadowNDC.z - depthBias);
-    return shadowCoverage;
-}
-
 float distanceAttenuation(constant Light &light, float3 toLight) {
     switch (light.type) {
         case LightTypeOmnidirectional: {
@@ -133,8 +115,7 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
                                  constant FrameConstants &frame [[buffer(3)]],
                                  constant Light *lights [[buffer(4)]],
                                  texture2d<float, access::sample> textureMap [[texture(0)]],
-                                 sampler textureSampler [[sampler(0)]],
-                                 depth2d<float, access::sample> shadowMap [[texture(1)]])
+                                 sampler textureSampler [[sampler(0)]])
 {
     float4 baseColor = float4(0.0f);
     
@@ -163,12 +144,10 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
                 ambientFactor = 1;
                 break;
             case LightTypeDirectional: {
-                float shadowFactor = 1 - shadow(in.worldPosition, shadowMap, light.viewProjectionMatrix);
-
                 float3 L = normalize(-light.direction);
                 float3 H = normalize(L + V);
-                diffuseFactor = shadowFactor * saturate(dot(N, L));
-                specularFactor = shadowFactor * powr(saturate(dot(N, H)), specularExponent);
+                diffuseFactor = saturate(dot(N, L));
+                specularFactor = powr(saturate(dot(N, H)), specularExponent);
                 
                 break;
             }
@@ -189,10 +168,4 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
     }
 
     return float4(litColor * baseColor.a, baseColor.a);
-}
-
-vertex float4 SolutionShadow(SolutionVertexIn in [[stage_in]],
-                             constant float4x4 &modelViewProjectionMatrix [[buffer(2)]])
-{
-    return modelViewProjectionMatrix * float4(in.position, 1.0);
 }

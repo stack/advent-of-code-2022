@@ -23,6 +23,7 @@ fileprivate class Node {
     weak var parentNode: Node?
     private(set) var childNodes: [Node] = []
     
+    var name: String = ""
     var mesh: MTKMesh?
     var texture: MTLTexture?
     var color: SIMD3<Float> = SIMD3<Float>(1, 1, 1);
@@ -69,6 +70,7 @@ fileprivate class Light {
         case omni
     }
     
+    var name: String = ""
     var type = LightType.directional
     var color = SIMD3<Float>(1, 1, 1)
     var intensity: Float = 1.0
@@ -83,12 +85,9 @@ fileprivate class Light {
         return -worldTransform.columns.2.xyz
     }
 
-    var castsShadows = false
-    var shadowTexture: MTLTexture?
-
     var projectionMatrix: simd_float4x4 {
-        let width: Float = 20.0
-        let depth: Float = 40.0
+        let width: Float = 1.5
+        let depth: Float = 10.0
         
         return simd_float4x4(
             orthographicProjectionWithLeft: -width,
@@ -142,13 +141,14 @@ open class Solution3DContext: SolutionContext {
     private var textures: [String:MTLTexture] = [:]
     
     private var pointOfView: Node!
-    private var nodes: [String:Node] = [:]
-    private var lights: [String:Light] = [:]
+    private var nodesTable: [String:Node] = [:]
+    private var nodes: [Node] = []
+    private var lightsTable: [String:Light] = [:]
+    private var lights: [Light] = []
     
     private var commandQueue: MTLCommandQueue!
     private var constantBuffer: MTLBuffer!
     private var pipelineState: MTLRenderPipelineState!
-    private var shadowPipelineState: MTLRenderPipelineState!
     private var depthStencilState: MTLDepthStencilState!
     private var samplerState: MTLSamplerState!
     
@@ -223,17 +223,16 @@ open class Solution3DContext: SolutionContext {
         pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "SolutionVertex")
         pipelineDescriptor.fragmentFunction = library.makeFunction(name: "SolutionFragment")
+        pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .one
+        pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+        pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
+        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        pipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
         pipelineDescriptor.label = "Main Pipeline"
         
         pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-        
-        let shadowPipelineDescriptor = MTLRenderPipelineDescriptor()
-        shadowPipelineDescriptor.vertexDescriptor = vertexDescriptor
-        shadowPipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
-        shadowPipelineDescriptor.vertexFunction = library.makeFunction(name: "SolutionShadow")
-        shadowPipelineDescriptor.label = "Shadow Pipeline"
-        
-        shadowPipelineState = try! device.makeRenderPipelineState(descriptor: shadowPipelineDescriptor)
         
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.depthCompareFunction = .less
@@ -302,35 +301,21 @@ open class Solution3DContext: SolutionContext {
         light.intensity = intensity
         light.color = color
         
-        lights[name] = light
+        lightsTable[name] = light
+        lights.append(light)
     }
     
-    public func addDirectLight(name: String, lookAt target: SIMD3<Float>, from origin: SIMD3<Float>, up: SIMD3<Float>, castsShadows: Bool = true, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
+    public func addDirectLight(name: String, lookAt target: SIMD3<Float>, from origin: SIMD3<Float>, up: SIMD3<Float>, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
         let light = Light()
         light.type = .directional
         light.worldTransform = simd_float4x4(lookAt: target, from: origin, up: up)
-        light.castsShadows = castsShadows
         light.color = color
         
-        if castsShadows {
-            let shadowMapSize = 2048
-            
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: .depth32Float,
-                width: shadowMapSize,
-                height: shadowMapSize,
-                mipmapped: false
-            )
-            textureDescriptor.storageMode = .private
-            textureDescriptor.usage = [ .renderTarget, .shaderRead ]
-            
-            light.shadowTexture = renderer.metalDevice.makeTexture(descriptor: textureDescriptor)
-        }
-        
-        lights[name] = light
+        lightsTable[name] = light
+        lights.append(light)
     }
     
-    public func addNode(name: String, mesh meshName: String, texture textureName: String? = nil, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) throws {
+    public func addNode(name: String, mesh meshName: String, texture textureName: String? = nil, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), parent: String? = nil) throws {
         guard let mesh = meshes[meshName] else {
             throw SolutionError.apiError("Node \(name) cannot find mesh \(meshName)")
         }
@@ -347,7 +332,12 @@ open class Solution3DContext: SolutionContext {
         node.texture = texture
         node.color = color
         
-        nodes[name] = node
+        nodesTable[name] = node
+        nodes.append(node)
+        
+        if let parent, let parentNode = nodesTable[parent] {
+            parentNode.addChildNode(node)
+        }
     }
     
     public func addPointLight(name: String, intensity: Float, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
@@ -356,7 +346,8 @@ open class Solution3DContext: SolutionContext {
         light.color = color
         light.intensity = intensity
         
-        lights[name] = light
+        lightsTable[name] = light
+        lights.append(light)
     }
     
     public func loadBoxMesh(name: String, extents: SIMD3<Float>, inwardNormals: Bool) throws {
@@ -444,11 +435,13 @@ open class Solution3DContext: SolutionContext {
     }
     
     public func removeLight(name: String) {
-        lights.removeValue(forKey: name)
+        lightsTable.removeValue(forKey: name)
+        lights.removeAll(where: { $0.name == name })
     }
     
     public func removeNode(name: String) {
-        nodes.removeValue(forKey: name)
+        nodesTable.removeValue(forKey: name)
+        nodes.removeAll(where: { $0.name == name })
     }
     
     public func updateCamera(eye: SIMD3<Float>, lookAt: SIMD3<Float>, up: SIMD3<Float>) {
@@ -456,7 +449,7 @@ open class Solution3DContext: SolutionContext {
     }
     
     public func updateLight(name: String, transform: simd_float4x4, intensity: Float, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
-        guard let light = lights[name] else { return }
+        guard let light = lightsTable[name] else { return }
         
         light.worldTransform = transform
         light.intensity = intensity
@@ -464,7 +457,7 @@ open class Solution3DContext: SolutionContext {
     }
     
     public func updateNode(name: String, transform: simd_float4x4) {
-        guard let node = nodes[name] else {
+        guard let node = nodesTable[name] else {
             return
         }
         
@@ -510,13 +503,7 @@ open class Solution3DContext: SolutionContext {
         encoder.setFragmentBuffer(constantBuffer, offset: frameConstantsOffset, index: 3)
         encoder.setFragmentBuffer(constantBuffer, offset: lightConstantsOffset, index: 4)
         
-        if let light = lights.values.first(where: { $0.castsShadows }) {
-            encoder.setFragmentTexture(light.shadowTexture!, index: 1)
-        } else {
-            encoder.setFragmentTexture(nil, index: 1)
-        }
-        
-        for (objectIndex, node) in nodes.values.enumerated() {
+        for (objectIndex, node) in nodes.enumerated() {
             guard let mesh = node.mesh else { continue }
             
             encoder.setVertexBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
@@ -545,58 +532,6 @@ open class Solution3DContext: SolutionContext {
         encoder.endEncoding()
     }
     
-    private func drawShadows(light: Light, commandBuffer: MTLCommandBuffer) {
-        let renderPassDescriptor = MTLRenderPassDescriptor()
-        renderPassDescriptor.depthAttachment.loadAction = .clear
-        renderPassDescriptor.depthAttachment.storeAction = .store
-        renderPassDescriptor.depthAttachment.clearDepth = 1.0
-        renderPassDescriptor.depthAttachment.texture = light.shadowTexture!
-        
-        let shadowViewMatrix = light.worldTransform.inverse
-        let shadowProjectionMatrix = light.projectionMatrix
-        let shadowViewProjectionMatrix = shadowProjectionMatrix * shadowViewMatrix
-        
-        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)!
-        encoder.setRenderPipelineState(shadowPipelineState)
-        
-        encoder.setDepthStencilState(depthStencilState)
-        encoder.setFrontFacing(.counterClockwise)
-        encoder.setCullMode(.back)
-        
-        encoder.setVertexBuffer(constantBuffer, offset: 0, index: 2)
-        encoder.setFragmentBuffer(constantBuffer, offset: 0, index: 2)
-        
-        for node in nodes.values {
-            guard let mesh = node.mesh else { continue }
-            
-            var constants = ShadowConstants(modelViewProjectionMatrix: shadowViewProjectionMatrix * node.worldTransform)
-            let layout = MemoryLayout<ShadowConstants>.self
-            let constantOffset = allocateConstantStorage(size: layout.size, alignment: layout.stride)
-            constantBuffer.contents().advanced(by: constantOffset).copyMemory(from: &constants, byteCount: layout.size)
-            
-            encoder.setVertexBufferOffset(constantOffset, index: 2)
-            encoder.setFragmentBufferOffset(constantOffset, index: 2)
-            
-            for (i, meshBuffer) in mesh.vertexBuffers.enumerated() {
-                encoder.setVertexBuffer(meshBuffer.buffer, offset: meshBuffer.offset, index: i)
-            }
-            
-            for submesh in mesh.submeshes {
-                let indexBuffer = submesh.indexBuffer
-                
-                encoder.drawIndexedPrimitives(
-                    type: submesh.primitiveType,
-                    indexCount: submesh.indexCount,
-                    indexType: submesh.indexType,
-                    indexBuffer: indexBuffer.buffer,
-                    indexBufferOffset: indexBuffer.offset
-                )
-            }
-        }
-        
-        encoder.endEncoding()
-    }
-    
     private func updateFrameConstants() {
         let viewMatrix = pointOfView.transform.inverse
         
@@ -608,7 +543,7 @@ open class Solution3DContext: SolutionContext {
             far: 100
         )
         
-        var constants = FrameConstants(projectionMatrix: projectionMatrix, viewMatrix: viewMatrix, lightCount: UInt32(lights.count))
+        var constants = FrameConstants(projectionMatrix: projectionMatrix, viewMatrix: viewMatrix, lightCount: UInt32(lightsTable.count))
         
         let constantsLayout = MemoryLayout<FrameConstants>.self
         frameConstantsOffset = allocateConstantStorage(size: constantsLayout.size, alignment: constantsLayout.stride)
@@ -619,10 +554,10 @@ open class Solution3DContext: SolutionContext {
     
     private func updateLightConstants() {
         let lightLayout = MemoryLayout<LightConstants>.self
-        lightConstantsOffset = allocateConstantStorage(size: lightLayout.stride * lights.count, alignment: lightLayout.stride)
+        lightConstantsOffset = allocateConstantStorage(size: lightLayout.stride * lightsTable.count, alignment: lightLayout.stride)
         let lightsBufferPointer = constantBuffer.contents().advanced(by: lightConstantsOffset).assumingMemoryBound(to: LightConstants.self)
         
-        for (lightIndex, light) in lights.values.enumerated() {
+        for (lightIndex, light) in lights.enumerated() {
             let shadowViewMatrix = light.worldTransform.inverse
             let shadowProjectionMatrix = light.projectionMatrix
             let shadowViewProjectionMatrix = shadowProjectionMatrix * shadowViewMatrix
@@ -641,7 +576,7 @@ open class Solution3DContext: SolutionContext {
         let nodeLayout = MemoryLayout<NodeConstants>.self
         nodeConstantsOffset.removeAll(keepingCapacity: true)
         
-        for node in nodes.values {
+        for node in nodes {
             var constants = NodeConstants(modelMatrix: node.worldTransform, color: node.color)
             
             let offset = allocateConstantStorage(size: nodeLayout.size, alignment: nodeLayout.stride)
@@ -689,10 +624,6 @@ open class Solution3DContext: SolutionContext {
         
         guard let commandBuffer = commandQueue.makeCommandBuffer() else {
             throw SolutionError.apiError("Could not get a command buffer for the render pass")
-        }
-        
-        if let light = lights.values.first(where: { $0.castsShadows }) {
-            drawShadows(light: light, commandBuffer: commandBuffer)
         }
         
         drawMainPass(target: metalTexture, commandBuffer: commandBuffer)
