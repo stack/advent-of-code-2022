@@ -208,8 +208,6 @@ open class Solution3DContext: SolutionContext {
         commandQueue = device.makeCommandQueue()!
         commandQueue.label = "Solution 3D Command Queue"
         
-        print(commandQueue)
-        
         constantBuffer = device.makeBuffer(length: MaxConstantsSize, options: .storageModeShared)!
         constantBuffer.label = "Solution 3D Constant Buffer"
         
