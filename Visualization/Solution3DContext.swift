@@ -440,8 +440,14 @@ open class Solution3DContext: SolutionContext {
     }
     
     public func removeNode(name: String) {
-        nodesTable.removeValue(forKey: name)
+        let removedNode = nodesTable.removeValue(forKey: name)
         nodes.removeAll(where: { $0.name == name })
+        
+        if let removedNode {
+            for child in removedNode.childNodes {
+                removeNode(name: child.name)
+            }
+        }
     }
     
     public func updateCamera(eye: SIMD3<Float>, lookAt: SIMD3<Float>, up: SIMD3<Float>) {
