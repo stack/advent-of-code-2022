@@ -67,7 +67,11 @@ struct SolutionVertexOut {
 
 struct NodeConstants {
     float4x4 modelMatrix;
-    float3 color;
+    float3 baseColor;
+    float3 ambientColor;
+    float3 diffuseColor;
+    float3 specularColor;
+    float specularExponent;
 };
 
 struct FrameConstants {
@@ -117,15 +121,11 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
                                  texture2d<float, access::sample> textureMap [[texture(0)]],
                                  sampler textureSampler [[sampler(0)]])
 {
-    float4 baseColor = float4(0.0f);
-    
-    if (is_null_texture(textureMap)) {
-        baseColor = float4(node.color, 1.0);
-    } else {
-        baseColor = textureMap.sample(textureSampler, in.texCoords);
+    float4 baseColor = float4(node.baseColor, 1.0);
+
+    if (!is_null_texture(textureMap)) {
+        baseColor *= textureMap.sample(textureSampler, in.texCoords);
     }
-    
-    float specularExponent = 50.0;
 
     float3 N = normalize(in.normal);
     float3 V = normalize(float3(0) - in.viewPosition);
@@ -146,8 +146,9 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
             case LightTypeDirectional: {
                 float3 L = normalize(-light.direction);
                 float3 H = normalize(L + V);
+                
                 diffuseFactor = saturate(dot(N, L));
-                specularFactor = powr(saturate(dot(N, H)), specularExponent);
+                specularFactor = powr(saturate(dot(N, H)), node.specularExponent);
                 
                 break;
             }
@@ -157,15 +158,22 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
 
                 float3 L = normalize(toLight);
                 float3 H = normalize(L + V);
+                
                 diffuseFactor = attenuation * saturate(dot(N, L));
-                specularFactor = attenuation * powr(saturate(dot(N, H)), specularExponent);
+                specularFactor = attenuation * powr(saturate(dot(N, H)), node.specularExponent);
                 
                 break;
             }
         }
-
-        litColor += (ambientFactor + diffuseFactor + specularFactor) * light.intensity * baseColor.rgb;
+        
+        float3 ambient = ambientFactor * node.ambientColor;
+        float3 diffuse = diffuseFactor * node.diffuseColor;
+        float3 specular = specularFactor * node.specularColor;
+        
+        litColor += (ambient + diffuse + specular) * light.intensity;
     }
+    
+    litColor = litColor * baseColor.rgb;
 
     return float4(litColor * baseColor.a, baseColor.a);
 }

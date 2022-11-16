@@ -18,6 +18,32 @@ fileprivate let MaxOutstandingFrameCount = 3
 fileprivate let MaxConstantsSize = 1024 * 1024
 fileprivate let MinBufferAlignment = 256
 
+fileprivate let DefaultAmbientColor = SIMD3<Float>(0.2, 0.2, 0.2)
+fileprivate let DefaultDiffuseColor = SIMD3<Float>(0.8, 0.8, 0.8)
+fileprivate let DefaultSpecularColor = SIMD3<Float>(1.0, 1.0, 1.0)
+fileprivate let DefaultSpecularExponent: Float = 0.0
+
+fileprivate struct Material {
+    var ambientColor: SIMD3<Float>
+    var diffuseColor: SIMD3<Float>
+    var specularColor: SIMD3<Float>
+    var specularExponent: Float
+    
+    init() {
+        ambientColor = DefaultAmbientColor
+        diffuseColor = DefaultDiffuseColor
+        specularColor = DefaultSpecularColor
+        specularExponent = DefaultSpecularExponent
+    }
+    
+    init(ambientColor: SIMD3<Float>, diffuseColor: SIMD3<Float>, specularColor: SIMD3<Float>, specularExponent: Float) {
+        self.ambientColor = ambientColor
+        self.diffuseColor = diffuseColor
+        self.specularColor = specularColor
+        self.specularExponent = specularExponent
+    }
+}
+
 fileprivate class Node {
     
     weak var parentNode: Node?
@@ -26,7 +52,8 @@ fileprivate class Node {
     var name: String = ""
     var mesh: MTKMesh?
     var texture: MTLTexture?
-    var color: SIMD3<Float> = SIMD3<Float>(1, 1, 1);
+    var baseColor = SIMD3<Float>(1, 1, 1)
+    var material: Material = Material()
     
     var transform: simd_float4x4 = matrix_identity_float4x4
     
@@ -102,7 +129,11 @@ fileprivate class Light {
 
 fileprivate struct NodeConstants {
     var modelMatrix: float4x4
-    var color: simd_float3
+    var baseColor: simd_float3
+    var ambientColor: simd_float3
+    var diffuseColor: simd_float3
+    var specularColor: simd_float3
+    var specularExponent: Float
 }
 
 fileprivate struct FrameConstants {
@@ -137,6 +168,7 @@ open class Solution3DContext: SolutionContext {
     
     private var meshes: [String:MTKMesh] = [:]
     private var meshTextures: [String:MTLTexture] = [:]
+    private var meshMaterials: [String:Material] = [:]
     
     private var textures: [String:MTLTexture] = [:]
     
@@ -313,10 +345,19 @@ open class Solution3DContext: SolutionContext {
         lights.append(light)
     }
     
-    public func addNode(name: String, mesh meshName: String, texture textureName: String? = nil, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), parent: String? = nil) throws {
+    public func addNode(name: String, mesh meshName: String, texture textureName: String? = nil, baseColor: SIMD3<Float> = SIMD3<Float>(1, 1, 1), ambientColor: SIMD3<Float>? = nil, diffuseColor: SIMD3<Float>? = nil, specularColor: SIMD3<Float>? = nil, specularExponent: Float? = nil, parent: String? = nil) throws {
         guard let mesh = meshes[meshName] else {
             throw SolutionError.apiError("Node \(name) cannot find mesh \(meshName)")
         }
+        
+        guard var material = meshMaterials[meshName] else {
+            throw SolutionError.apiError("Node \(name) cannot find mesh material \(meshName)")
+        }
+        
+        if let ambientColor { material.ambientColor = ambientColor }
+        if let diffuseColor { material.diffuseColor = diffuseColor }
+        if let specularColor { material.specularColor = specularColor }
+        if let specularExponent { material.specularExponent = specularExponent }
         
         var texture: MTLTexture? = nil
         
@@ -324,11 +365,15 @@ open class Solution3DContext: SolutionContext {
             texture = nodeTexture
         } else if let nodeTexture = meshTextures[meshName] {
             texture = nodeTexture
+        } else {
+            // TODO: Set default white texture
         }
         
         let node = Node(mesh: mesh)
+        node.name = name
         node.texture = texture
-        node.color = color
+        node.baseColor = baseColor
+        node.material = material
         
         nodesTable[name] = node
         nodes.append(node)
@@ -348,6 +393,27 @@ open class Solution3DContext: SolutionContext {
         lights.append(light)
     }
     
+    private func convertPropertyToColor(_ property: MDLMaterialProperty) -> SIMD3<Float> {
+        if property.type == .color || property.type == .texture {
+            let color = property.color!
+            let components = color.components!
+            
+            if color.numberOfComponents == 1 { // Grayscale
+                return SIMD3<Float>(Float(components[0]), Float(components[0]), Float(components[0]))
+            } else if color.numberOfComponents == 3 || color.numberOfComponents == 4 {
+                return SIMD3<Float>(Float(components[0]), Float(components[1]), Float(components[2]))
+            } else {
+                fatalError("Could not convert \(color.numberOfComponents) components to a color")
+            }
+        } else if property.type == .float {
+            return SIMD3<Float>(property.floatValue, property.floatValue, property.floatValue)
+        } else if property.type == .float3 {
+            return property.float3Value
+        } else {
+            fatalError("Could not convert property of type \(property.type) to a color")
+        }
+    }
+    
     public func loadBoxMesh(name: String, extents: SIMD3<Float>, inwardNormals: Bool) throws {
         let mdlMesh = MDLMesh(
             boxWithExtent: extents,
@@ -360,6 +426,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         meshes[name] = mtkMesh
+        meshMaterials[name] = Material()
     }
     
     public func loadMesh(name: String, resource: String, withExtension ext: String) throws {
@@ -377,18 +444,35 @@ open class Solution3DContext: SolutionContext {
         }
         
         let firstSubmesh = mdlMesh.submeshes?.firstObject as? MDLSubmesh
-        let material = firstSubmesh?.material
+        let meshMaterial = firstSubmesh?.material
         
         var texture: MTLTexture?
-        if let baseColorProperty = material?.property(with: MDLMaterialSemantic.baseColor) {
-            if baseColorProperty.type == .texture, let textureURL = baseColorProperty.urlValue {
+        var material = Material()
+        
+        if let property = meshMaterial?.property(with: .baseColor) {
+            if property.type == .texture, let textureURL = property.urlValue {
                 texture = try textureLoader.newTexture(URL: textureURL, options: textureOptions)
             }
+            
+            material.diffuseColor = convertPropertyToColor(property)
+        }
+        
+        if let property = meshMaterial?.property(with: .specular) {
+            material.specularColor = convertPropertyToColor(property)
+        }
+        
+        if let property = meshMaterial?.property(with: .specularExponent) {
+            material.specularExponent = property.floatValue
+        }
+        
+        if let property = meshMaterial?.property(with: .emission) {
+            material.ambientColor = convertPropertyToColor(property)
         }
         
         let mesh = try! MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         self.meshes[name] = mesh
+        self.meshMaterials[name] = material
         
         if let texture {
             self.meshTextures[name] = texture
@@ -406,6 +490,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         meshes[name] = mtkMesh
+        meshMaterials[name] = Material()
     }
     
     public func loadSphereMesh(name: String, extents: SIMD3<Float>, segments: SIMD2<UInt32>, inwardNormals: Bool) throws {
@@ -420,6 +505,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         meshes[name] = mtkMesh
+        meshMaterials[name] = Material()
     }
     
     public func loadTexture(name: String, resource: String, withExtension ext: String) throws {
@@ -460,12 +546,18 @@ open class Solution3DContext: SolutionContext {
         light.color = color
     }
     
-    public func updateNode(name: String, transform: simd_float4x4) {
+    public func updateNode(name: String, transform: simd_float4x4, baseColor: SIMD3<Float>? = nil, ambientColor: SIMD3<Float>? = nil, diffuseColor: SIMD3<Float>? = nil, specularColor: SIMD3<Float>? = nil, specularExponent: Float? = nil) {
         guard let node = nodesTable[name] else {
             return
         }
         
         node.transform = transform
+        
+        if let baseColor { node.baseColor = baseColor }
+        if let ambientColor { node.material.ambientColor = ambientColor }
+        if let diffuseColor { node.material.diffuseColor = diffuseColor }
+        if let specularColor { node.material.specularColor = specularColor }
+        if let specularExponent { node.material.specularExponent = specularExponent }
     }
     
     // MARK: - Drawing
@@ -510,6 +602,8 @@ open class Solution3DContext: SolutionContext {
         for (objectIndex, node) in nodes.enumerated() {
             guard let mesh = node.mesh else { continue }
             
+            encoder.pushDebugGroup("Node \(node.name)")
+            
             encoder.setVertexBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
             encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
             
@@ -531,6 +625,8 @@ open class Solution3DContext: SolutionContext {
                     indexBufferOffset: indexBuffer.offset
                 )
             }
+            
+            encoder.popDebugGroup()
         }
         
         encoder.endEncoding()
@@ -581,7 +677,14 @@ open class Solution3DContext: SolutionContext {
         nodeConstantsOffset.removeAll(keepingCapacity: true)
         
         for node in nodes {
-            var constants = NodeConstants(modelMatrix: node.worldTransform, color: node.color)
+            var constants = NodeConstants(
+                modelMatrix: node.worldTransform,
+                baseColor: node.baseColor,
+                ambientColor: node.material.ambientColor,
+                diffuseColor: node.material.diffuseColor,
+                specularColor: node.material.specularColor,
+                specularExponent: node.material.specularExponent
+            )
             
             let offset = allocateConstantStorage(size: nodeLayout.size, alignment: nodeLayout.stride)
             let constantsPointer = constantBuffer.contents().advanced(by: offset)
