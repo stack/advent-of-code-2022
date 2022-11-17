@@ -122,10 +122,7 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
                                  sampler textureSampler [[sampler(0)]])
 {
     float4 baseColor = float4(node.baseColor, 1.0);
-
-    if (!is_null_texture(textureMap)) {
-        baseColor *= textureMap.sample(textureSampler, in.texCoords);
-    }
+    baseColor *= textureMap.sample(textureSampler, in.texCoords);
 
     float3 N = normalize(in.normal);
     float3 V = normalize(float3(0) - in.viewPosition);

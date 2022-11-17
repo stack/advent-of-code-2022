@@ -188,6 +188,7 @@ open class Solution3DContext: SolutionContext {
     private var msaaTextures: [MTLTexture]!
     private var msaaDepthTextures: [MTLTexture]!
     private var depthTextures: [MTLTexture]!
+    private var defaultTexture: MTLTexture!
     
     private var currentConstantBufferOffset = 0
     private var frameConstantsOffset = 0
@@ -319,7 +320,21 @@ open class Solution3DContext: SolutionContext {
             device.makeTexture(descriptor: depthTextureDescriptor)!
         }
         
-        try! loadSphereMesh(name: "_LightBulb", extents: SIMD3<Float>(0.2, 0.2, 0.2), segments: SIMD2<UInt32>(5, 5), inwardNormals: false)
+        let defaultTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: 256,
+            height: 256,
+            mipmapped: false
+        )
+
+        defaultTextureDescriptor.usage = .shaderRead
+        
+        defaultTexture = device.makeTexture(descriptor: defaultTextureDescriptor)!
+        
+        let bounds = MTLRegionMake2D(0, 0, 256, 256)
+        let data = [UInt8](repeating: 255, count: 256 * 256 * 4)
+        
+        defaultTexture.replace(region: bounds, mipmapLevel: 0, withBytes: data, bytesPerRow: 256 * 4)
     }
     
     
@@ -366,7 +381,7 @@ open class Solution3DContext: SolutionContext {
         } else if let nodeTexture = meshTextures[meshName] {
             texture = nodeTexture
         } else {
-            // TODO: Set default white texture
+            texture = defaultTexture
         }
         
         let node = Node(mesh: mesh)
@@ -605,6 +620,7 @@ open class Solution3DContext: SolutionContext {
         encoder.setFragmentBuffer(constantBuffer, offset: 0, index: 2)
         encoder.setFragmentBuffer(constantBuffer, offset: frameConstantsOffset, index: 3)
         encoder.setFragmentBuffer(constantBuffer, offset: lightConstantsOffset, index: 4)
+        encoder.setFragmentSamplerState(samplerState, index: 0)
         
         for (objectIndex, node) in nodes.enumerated() {
             guard let mesh = node.mesh else { continue }
@@ -619,7 +635,6 @@ open class Solution3DContext: SolutionContext {
             }
             
             encoder.setFragmentTexture(node.texture, index: 0)
-            encoder.setFragmentSamplerState(samplerState, index: 0)
             
             for submesh in mesh.submeshes {
                 let indexBuffer = submesh.indexBuffer
