@@ -395,15 +395,18 @@ open class Solution3DContext: SolutionContext {
     
     private func convertPropertyToColor(_ property: MDLMaterialProperty) -> SIMD3<Float> {
         if property.type == .color || property.type == .texture {
-            let color = property.color!
-            let components = color.components!
-            
-            if color.numberOfComponents == 1 { // Grayscale
-                return SIMD3<Float>(Float(components[0]), Float(components[0]), Float(components[0]))
-            } else if color.numberOfComponents == 3 || color.numberOfComponents == 4 {
-                return SIMD3<Float>(Float(components[0]), Float(components[1]), Float(components[2]))
+            if let color = property.color {
+                let components = color.components!
+                
+                if color.numberOfComponents == 1 { // Grayscale
+                    return SIMD3<Float>(Float(components[0]), Float(components[0]), Float(components[0]))
+                } else if color.numberOfComponents == 3 || color.numberOfComponents == 4 {
+                    return SIMD3<Float>(Float(components[0]), Float(components[1]), Float(components[2]))
+                } else {
+                    fatalError("Could not convert \(color.numberOfComponents) components to a color")
+                }
             } else {
-                fatalError("Could not convert \(color.numberOfComponents) components to a color")
+                return SIMD3<Float>(repeating: 1)
             }
         } else if property.type == .float {
             return SIMD3<Float>(property.floatValue, property.floatValue, property.floatValue)
@@ -451,7 +454,11 @@ open class Solution3DContext: SolutionContext {
         
         if let property = meshMaterial?.property(with: .baseColor) {
             if property.type == .texture, let textureURL = property.urlValue {
-                texture = try textureLoader.newTexture(URL: textureURL, options: textureOptions)
+                if let sampler = property.textureSamplerValue, let sourceTexture = sampler.texture {
+                    texture = try textureLoader.newTexture(texture: sourceTexture, options: textureOptions)
+                } else {
+                    texture = try textureLoader.newTexture(URL: textureURL, options: textureOptions)
+                }
             }
             
             material.diffuseColor = convertPropertyToColor(property)
@@ -479,7 +486,7 @@ open class Solution3DContext: SolutionContext {
         }
     }
     
-    public func loadPlaneTexture(name: String, extents: SIMD3<Float>) throws {
+    public func loadPlaneMesh(name: String, extents: SIMD3<Float>) throws {
         let mdlMesh = MDLMesh(
             planeWithExtent: extents,
             segments: SIMD2<UInt32>(1, 1),
@@ -538,12 +545,12 @@ open class Solution3DContext: SolutionContext {
         pointOfView.transform = simd_float4x4(lookAt: lookAt, from: eye, up: up)
     }
     
-    public func updateLight(name: String, transform: simd_float4x4, intensity: Float, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
+    public func updateLight(name: String, transform: simd_float4x4, intensity: Float? = nil, color: SIMD3<Float>? = nil) {
         guard let light = lightsTable[name] else { return }
         
         light.worldTransform = transform
-        light.intensity = intensity
-        light.color = color
+        if let intensity { light.intensity = intensity }
+        if let color { light.color = color }
     }
     
     public func updateNode(name: String, transform: simd_float4x4, baseColor: SIMD3<Float>? = nil, ambientColor: SIMD3<Float>? = nil, diffuseColor: SIMD3<Float>? = nil, specularColor: SIMD3<Float>? = nil, specularExponent: Float? = nil) {
