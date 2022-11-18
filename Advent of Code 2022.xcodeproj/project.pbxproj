@@ -24,13 +24,8 @@
 		D1798CC129219014001C64C0 /* earth.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CBE29219014001C64C0 /* earth.png */; };
 		D1798CC229219014001C64C0 /* earth.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CBF29219014001C64C0 /* earth.mtl */; };
 		D1798CC329219014001C64C0 /* earth.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC029219014001C64C0 /* earth.obj */; };
-		D1798CCB29219101001C64C0 /* spot_control_mesh.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC429219100001C64C0 /* spot_control_mesh.obj */; };
 		D1798CCC29219101001C64C0 /* spot_triangulated.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC529219100001C64C0 /* spot_triangulated.mtl */; };
-		D1798CCD29219101001C64C0 /* spot_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC629219101001C64C0 /* spot_texture.png */; };
-		D1798CCE29219101001C64C0 /* spot_texture.svg in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC729219101001C64C0 /* spot_texture.svg */; };
 		D1798CCF29219101001C64C0 /* spot_triangulated.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC829219101001C64C0 /* spot_triangulated.obj */; };
-		D1798CD029219101001C64C0 /* spot_material.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC929219101001C64C0 /* spot_material.mtl */; };
-		D1798CD129219101001C64C0 /* spot_quadrangulated.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CCA29219101001C64C0 /* spot_quadrangulated.obj */; };
 		D1798CD629233139001C64C0 /* starscape.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD529233139001C64C0 /* starscape.png */; };
 		D1798CDA292337B2001C64C0 /* clouds.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD7292337B2001C64C0 /* clouds.png */; };
 		D1798CDB292337B2001C64C0 /* clouds.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD8292337B2001C64C0 /* clouds.mtl */; };
@@ -49,6 +44,15 @@
 		DC05EDC129145268004FF9ED /* SolutionShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C429140CF300C718F3 /* SolutionShaders.metal */; };
 		DC05EDC229145268004FF9ED /* SolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C829141D1100C718F3 /* SolutionView.swift */; };
 		DC05EDC329145268004FF9ED /* SolutionRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C229140A1400C718F3 /* SolutionRenderView.swift */; };
+		DC310E0B29283062004FB3D0 /* spot_material.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC929219101001C64C0 /* spot_material.mtl */; };
+		DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D62926B839004E00CD /* Shiba.usdz */; };
+		DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D82926B83F004E00CD /* Viking Room.usdz */; };
+		DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6DA2926B844004E00CD /* Stone Block.usdz */; };
+		DC37C6DF2927CC8E004E00CD /* spot_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC629219101001C64C0 /* spot_texture.png */; };
+		DC37C6E529281EF3004E00CD /* rustediron2_roughness.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */; };
+		DC37C6E629281EF3004E00CD /* rustediron2_normal.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E229281EF3004E00CD /* rustediron2_normal.png */; };
+		DC37C6E729281EF3004E00CD /* rustediron2_basecolor.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */; };
+		DC37C6E829281EF3004E00CD /* rustediron2_metallic.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E429281EF3004E00CD /* rustediron2_metallic.png */; };
 		DC54E1B02913EF8000C718F3 /* VisualizationTestingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1AF2913EF8000C718F3 /* VisualizationTestingApp.swift */; };
 		DC54E1B42913EF8100C718F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC54E1B32913EF8100C718F3 /* Assets.xcassets */; };
 		DC54E1B72913EF8100C718F3 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC54E1B62913EF8100C718F3 /* Preview Assets.xcassets */; };
@@ -154,6 +158,13 @@
 		DC05EDA529145133004FF9ED /* PriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityQueue.swift; sourceTree = "<group>"; };
 		DC05EDB32914525D004FF9ED /* Visualization.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Visualization.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC05EDB52914525D004FF9ED /* Visualization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Visualization.h; sourceTree = "<group>"; };
+		DC37C6D62926B839004E00CD /* Shiba.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Shiba.usdz; sourceTree = "<group>"; };
+		DC37C6D82926B83F004E00CD /* Viking Room.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Viking Room.usdz"; sourceTree = "<group>"; };
+		DC37C6DA2926B844004E00CD /* Stone Block.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Stone Block.usdz"; sourceTree = "<group>"; };
+		DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rustediron2_roughness.png; sourceTree = "<group>"; };
+		DC37C6E229281EF3004E00CD /* rustediron2_normal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rustediron2_normal.png; sourceTree = "<group>"; };
+		DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rustediron2_basecolor.png; sourceTree = "<group>"; };
+		DC37C6E429281EF3004E00CD /* rustediron2_metallic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rustediron2_metallic.png; sourceTree = "<group>"; };
 		DC54E1AC2913EF8000C718F3 /* Visualization Testing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Visualization Testing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC54E1AF2913EF8000C718F3 /* VisualizationTestingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizationTestingApp.swift; sourceTree = "<group>"; };
 		DC54E1B32913EF8100C718F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -236,6 +247,10 @@
 		D1798CD2292191C0001C64C0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				DC37C6E029281EEA004E00CD /* Rusted Iron */,
+				DC37C6DA2926B844004E00CD /* Stone Block.usdz */,
+				DC37C6D82926B83F004E00CD /* Viking Room.usdz */,
+				DC37C6D62926B839004E00CD /* Shiba.usdz */,
 				D1798CDD292337B4001C64C0 /* Clouds */,
 				D1798CD4292191D1001C64C0 /* Earth */,
 				D1798CD3292191CB001C64C0 /* Spot */,
@@ -321,6 +336,17 @@
 				DC05EDB52914525D004FF9ED /* Visualization.h */,
 			);
 			path = Visualization;
+			sourceTree = "<group>";
+		};
+		DC37C6E029281EEA004E00CD /* Rusted Iron */ = {
+			isa = PBXGroup;
+			children = (
+				DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */,
+				DC37C6E429281EF3004E00CD /* rustediron2_metallic.png */,
+				DC37C6E229281EF3004E00CD /* rustediron2_normal.png */,
+				DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */,
+			);
+			path = "Rusted Iron";
 			sourceTree = "<group>";
 		};
 		DC54E1A02913EF3900C718F3 = {
@@ -540,21 +566,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC310E0B29283062004FB3D0 /* spot_material.mtl in Resources */,
+				DC37C6E729281EF3004E00CD /* rustediron2_basecolor.png in Resources */,
+				DC37C6DF2927CC8E004E00CD /* spot_texture.png in Resources */,
 				D1798CC229219014001C64C0 /* earth.mtl in Resources */,
-				D1798CCD29219101001C64C0 /* spot_texture.png in Resources */,
 				D1798CC329219014001C64C0 /* earth.obj in Resources */,
-				D1798CD129219101001C64C0 /* spot_quadrangulated.obj in Resources */,
 				D1798CCF29219101001C64C0 /* spot_triangulated.obj in Resources */,
 				D1798CD629233139001C64C0 /* starscape.png in Resources */,
 				D1798CA5292057C2001C64C0 /* Preview Assets.xcassets in Resources */,
 				D1798CA1292057C2001C64C0 /* Assets.xcassets in Resources */,
 				D1798CDB292337B2001C64C0 /* clouds.mtl in Resources */,
-				D1798CD029219101001C64C0 /* spot_material.mtl in Resources */,
-				D1798CCB29219101001C64C0 /* spot_control_mesh.obj in Resources */,
 				D1798CCC29219101001C64C0 /* spot_triangulated.mtl in Resources */,
+				DC37C6E629281EF3004E00CD /* rustediron2_normal.png in Resources */,
+				DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */,
+				DC37C6E829281EF3004E00CD /* rustediron2_metallic.png in Resources */,
+				DC37C6E529281EF3004E00CD /* rustediron2_roughness.png in Resources */,
+				DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */,
 				D1798CC129219014001C64C0 /* earth.png in Resources */,
 				D1798CDC292337B2001C64C0 /* clouds.obj in Resources */,
-				D1798CCE29219101001C64C0 /* spot_texture.svg in Resources */,
+				DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */,
 				D1798CDA292337B2001C64C0 /* clouds.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

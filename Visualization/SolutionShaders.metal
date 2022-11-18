@@ -37,6 +37,11 @@ fragment float4 FragmentShader(VertexOut out [[ stage_in ]],
     return color;
 }
 
+enum AccessMode : uint8_t {
+    AccessModeValue,
+    AccessModeTexture
+};
+
 enum LightType : uint {
     LightTypeAmbient,
     LightTypeDirectional,
@@ -54,7 +59,8 @@ struct Light {
 struct SolutionVertexIn {
     float3 position  [[attribute(0)]];
     float3 normal    [[attribute(1)]];
-    float2 texCoords [[attribute(2)]];
+    float3 tangents  [[attribute(2)]];
+    float2 texCoords [[attribute(3)]];
 };
 
 struct SolutionVertexOut {
@@ -67,11 +73,26 @@ struct SolutionVertexOut {
 
 struct NodeConstants {
     float4x4 modelMatrix;
-    float3 baseColor;
-    float3 ambientColor;
-    float3 diffuseColor;
-    float3 specularColor;
-    float specularExponent;
+};
+
+struct MaterialConstants {
+    AccessMode albedoMode;
+    float3 albedoValue;
+    
+    AccessMode metallicMode;
+    float metallicValue;
+    
+    AccessMode roughnessMode;
+    float roughnessValue;
+    
+    AccessMode normalMode;
+    float3 normalValue;
+    
+    AccessMode emissiveMode;
+    float3 emissiveValue;
+    
+    AccessMode ambientOcclusionMode;
+    float ambientOcclusionValue;
 };
 
 struct FrameConstants {
@@ -79,6 +100,86 @@ struct FrameConstants {
     float4x4 viewMatrix;
     uint lightCount;
 };
+
+float DistanceAttenuation(constant Light &light, float3 toLight) {
+    switch (light.type) {
+        case LightTypeOmnidirectional: {
+            float lightDistSq = dot(toLight, toLight);
+            return 1.0f / max(lightDistSq, 1e-4);
+            break;
+        }
+        default:
+            return 1.0;
+    }
+}
+
+float DistributionGGX(float3 N, float3 H, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * 2;
+    
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+    
+    float numerator = a2;
+    float denominator = (NdotH2 * (a2 - 1.0) + 1.0);
+    denominator = M_PI_F * denominator * denominator;
+    
+    return numerator / denominator;
+}
+
+float3 FresnelSchlick(float cosTheta, float3 f0) {
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+float GeometorySchlickGGX(float NdotV, float roughtness) {
+    float r = (roughtness + 1.0);
+    float k = (r * r) / 8.0;
+    
+    float numerator = NdotV;
+    float denominator = NdotV * (1.0 - k) + k;
+    
+    return numerator / denominator;
+}
+
+float GeometrySmith(float3 N, float3 V, float3 L, float roughess) {
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometorySchlickGGX(NdotV, roughess);
+    float ggx1 = GeometorySchlickGGX(NdotL, roughess);
+    
+    return ggx1 * ggx2;
+}
+
+#define SRGB_ALPHA 0.055
+
+float LinearFromSRGB(float x) {
+    if (x <= 0.04045)
+        return x / 12.92;
+    else
+        return powr((x + SRGB_ALPHA) / (1.0 + SRGB_ALPHA), 2.4);
+}
+
+float3 LinearFromSRGB(float3 rgb) {
+    return float3(LinearFromSRGB(rgb.r), LinearFromSRGB(rgb.g), LinearFromSRGB(rgb.b));
+}
+
+float3 NormalFromMap(texture2d<float> map, SolutionVertexOut in) {
+    constexpr sampler normalSampler(filter::nearest);
+    
+    float3 tangentNormal = map.sample(normalSampler, in.texCoords).xyz;
+    
+    float3 q1 = dfdx(in.viewPosition);
+    float3 q2 = dfdy(in.viewPosition);
+    float2 st1 = dfdx(in.texCoords);
+    float2 st2 = dfdy(in.texCoords);
+    
+    float3 N = normalize(in.normal);
+    float3 T = normalize(q1 * st2.y - q2 * st1.y);
+    float3 B = -normalize(cross(N, T));
+    float3x3 TBN = float3x3(T, B, N);
+    
+    return normalize(TBN * tangentNormal);
+}
 
 vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
                                         constant NodeConstants &node [[buffer(2)]],
@@ -102,75 +203,130 @@ vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
     return out;
 }
 
-float distanceAttenuation(constant Light &light, float3 toLight) {
-    switch (light.type) {
-        case LightTypeOmnidirectional: {
-            float lightDistSq = dot(toLight, toLight);
-            return 1.0f / max(lightDistSq, 1e-4);
-            break;
-        }
-        default:
-            return 1.0;
-    }
-}
-
 fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
-                                 constant NodeConstants &node [[buffer(2)]],
-                                 constant FrameConstants &frame [[buffer(3)]],
-                                 constant Light *lights [[buffer(4)]],
-                                 texture2d<float, access::sample> textureMap [[texture(0)]],
+                                 constant NodeConstants& node [[buffer(2)]],
+                                 constant FrameConstants& frame [[buffer(3)]],
+                                 constant Light* lights [[buffer(4)]],
+                                 constant MaterialConstants& material [[buffer(5)]],
+                                 texture2d<float, access::sample> albedoTexture [[texture(0)]],
+                                 texture2d<float, access::sample> metallicTexture [[texture(1)]],
+                                 texture2d<float, access::sample> roughnessTexture [[texture(2)]],
+                                 texture2d<float, access::sample> normalTexture [[texture(3)]],
+                                 texture2d<float, access::sample> emissiveTexture [[texture(4)]],
+                                 texture2d<float, access::sample> ambientOcclusionTexture [[texture(5)]],
                                  sampler textureSampler [[sampler(0)]])
 {
-    float4 baseColor = float4(node.baseColor, 1.0);
-    baseColor *= textureMap.sample(textureSampler, in.texCoords);
-
-    float3 N = normalize(in.normal);
-    float3 V = normalize(float3(0) - in.viewPosition);
-
-    float3 litColor { 0 };
-
-    for (uint i = 0; i < frame.lightCount; ++i) {
-        float ambientFactor = 0;
-        float diffuseFactor = 0;
-        float specularFactor = 0;
-
-        constant Light &light = lights[i];
-
-        switch(light.type) {
-            case LightTypeAmbient:
-                ambientFactor = 1;
-                break;
-            case LightTypeDirectional: {
-                float3 L = normalize(-light.direction);
-                float3 H = normalize(L + V);
-                
-                diffuseFactor = saturate(dot(N, L));
-                specularFactor = powr(saturate(dot(N, H)), node.specularExponent);
-                
-                break;
-            }
-            case LightTypeOmnidirectional: {
-                float3 toLight = (light.position - in.worldPosition);
-                float attenuation = distanceAttenuation(light, toLight);
-
-                float3 L = normalize(toLight);
-                float3 H = normalize(L + V);
-                
-                diffuseFactor = attenuation * saturate(dot(N, L));
-                specularFactor = attenuation * powr(saturate(dot(N, H)), node.specularExponent);
-                
-                break;
-            }
-        }
-        
-        float3 ambient = ambientFactor * node.ambientColor;
-        float3 diffuse = diffuseFactor * node.diffuseColor;
-        float3 specular = specularFactor * node.specularColor;
-        
-        litColor += (ambient + diffuse + specular) * light.intensity;
+    float3 albedo;
+    float alpha;
+    
+    if (material.albedoMode == AccessModeValue) {
+        albedo = material.albedoValue;
+        alpha = 1.0;
+    } else {
+        float4 color = albedoTexture.sample(textureSampler, in.texCoords);
+        albedo = LinearFromSRGB(color.xyz);
+        alpha = color.w;
     }
     
-    litColor = litColor * baseColor.rgb;
-
-    return float4(litColor * baseColor.a, baseColor.a);
+    float metallic;
+    
+    if (material.metallicMode == AccessModeValue) {
+        metallic = material.metallicValue;
+    } else {
+        metallic = metallicTexture.sample(textureSampler, in.texCoords).x;
+    }
+    
+    float roughness;
+    
+    if (material.roughnessMode == AccessModeValue) {
+        roughness = material.roughnessValue;
+    } else {
+        roughness = roughnessTexture.sample(textureSampler, in.texCoords).x;
+    }
+    
+    float3 ambientOcclusion;
+    
+    if (material.ambientOcclusionMode == AccessModeValue) {
+        ambientOcclusion = material.ambientOcclusionValue;
+    } else {
+        ambientOcclusion = ambientOcclusionTexture.sample(textureSampler, in.texCoords).xyz;
+    }
+    
+    float3 emissive;
+    
+    if (material.emissiveMode == AccessModeValue) {
+        emissive = material.emissiveValue;
+    } else {
+        emissive = emissiveTexture.sample(textureSampler, in.texCoords).xyz;
+    }
+    
+    float3 N;
+    
+    if (material.normalMode == AccessModeValue) {
+        N = normalize(in.normal);
+    } else {
+        N = NormalFromMap(normalTexture, in);
+    }
+    
+    float3 V = normalize(float3(0) - in.viewPosition);
+    
+    float3 f0 = float3(0.04);
+    f0 = mix(f0, albedo, metallic);
+    
+    float3 l0 = float3(0.0);
+    
+    for (uint i = 0; i < frame.lightCount; ++i) {
+        constant Light &light = lights[i];
+        
+        float3 L;
+        float attenuation;
+        
+        switch (light.type) {
+            case LightTypeAmbient:
+                L = normalize(-light.direction);
+                attenuation = 1.0;
+                
+                break;
+            case LightTypeDirectional:
+                L = normalize(-light.direction);
+                attenuation = 1.0;
+                
+                break;
+            case LightTypeOmnidirectional:
+                float3 toLight = (light.position - in.worldPosition);
+                
+                L = normalize(toLight);
+                attenuation = DistanceAttenuation(light, toLight);
+                
+                break;
+        }
+        
+        float3 H = normalize(L + V);
+        float3 radiance = light.intensity * attenuation;
+        
+        float NDF = DistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
+        float3 F = FresnelSchlick(clamp(dot(H, V), 0.0, 1.0), f0);
+        
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        float3 specular = numerator / denominator;
+        
+        float3 kS = F;
+        float3 kD = float3(1.0) - kS;
+        
+        kD *= 1.0 - metallic;
+        
+        float NdotL = max(dot(N, L), 0.0);
+        
+        l0 += (kD * albedo / M_PI_F + specular) * radiance * NdotL;
+    }
+    
+    float3 ambient = float3(0.03) * albedo * ambientOcclusion;
+    
+    float3 color = ambient + l0; // + emissive;
+    color = color / (color + float3(1.0));
+    color = pow(color, float3(1.0 / 2.4));
+    
+    return float4(color * alpha, alpha);
 }
