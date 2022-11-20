@@ -103,7 +103,7 @@ class Visualization3DTestingContext: Solution3DContext {
         
         try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
         
-        try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Startscape")
+        try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Starscape")
         try loadSphereMesh(name: "Light", extents: SIMD3<Float>(1, 1, 1), segments: SIMD2<UInt32>(24, 24), albedo: SIMD3<Float>(1.0, 1.0, 1.0), roughness: 0.5)
         try loadBoxMesh(name: "Cube", extents: SIMD3<Float>(1, 1, 1), albedo: SIMD3<Float>(1.0, 1.0, 1.0))
         try loadPlaneMesh(name: "Plane", extents: SIMD3<Float>(1, 1, 0), albedo: SIMD3<Float>(0.5, 0.5, 0.5))
@@ -125,11 +125,11 @@ class Visualization3DTestingContext: Solution3DContext {
         updateNode(name: "Point 1", albedo: SIMD3<Float>(1, 1, 0))
         updateNode(name: "Point 2", albedo: SIMD3<Float>(0, 1, 1))
         
-        addDirectLight(name: "Sun 1", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0))
-        addDirectLight(name: "Sun 2", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, 1), up: SIMD3<Float>(0, 1, 0))
-        addDirectLight(name: "Sun 3", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-1, 1, 1), up: SIMD3<Float>(0, 1, 0))
-        addPointLight(name: "Point 1", intensity: 1.0, color: SIMD3<Float>(1, 1, 0))
-        addPointLight(name: "Point 2", intensity: 1.0, color: SIMD3<Float>(0, 1, 1))
+        addDirectLight(name: "Sun 1", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
+        addDirectLight(name: "Sun 2", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
+        addDirectLight(name: "Sun 3", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
+        addPointLight(name: "Point 1", color: SIMD3<Float>(1, 1, 0), intensity: 1.0)
+        addPointLight(name: "Point 2", color: SIMD3<Float>(0, 1, 1), intensity: 1.0)
         
         updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
         

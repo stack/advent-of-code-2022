@@ -54,7 +54,7 @@ fileprivate struct Material {
         normalValue = float3(for: .tangentSpaceNormal, in: sourceMaterial)
         normalTexture = texture(for: .tangentSpaceNormal, in: sourceMaterial, textureLoader: textureLoader)
         
-        emissiveValue = float3(for: .emission, in: sourceMaterial)
+        emissiveValue = .zero
         emissiveTexture = texture(for: .emission, in: sourceMaterial, textureLoader: textureLoader)
         
         ambientOcclusionValue = float(for: .ambientOcclusion, in: sourceMaterial)
@@ -199,7 +199,6 @@ fileprivate class Node {
 fileprivate class Light {
     
     enum LightType : UInt32 {
-        case ambient
         case directional
         case omni
     }
@@ -489,8 +488,6 @@ open class Solution3DContext: SolutionContext {
         let (sourceMeshes, meshes) = try MTKMesh.newMeshes(asset: mdlAsset, device: renderer.metalDevice)
         
         for (sourceMesh, mesh) in zip(sourceMeshes, meshes) {
-            print("Loading mesh \(sourceMesh.name) for \(name)")
-            
             var materials: [Material] = []
             
             for sourceSubmesh in sourceMesh.submeshes as! [MDLSubmesh] {
@@ -734,17 +731,18 @@ open class Solution3DContext: SolutionContext {
     
     // MARK: - Light & Camera Management
     
-    public func addDirectLight(name: String, lookAt target: SIMD3<Float>, from origin: SIMD3<Float>, up: SIMD3<Float>, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
+    public func addDirectLight(name: String, lookAt target: SIMD3<Float>, from origin: SIMD3<Float>, up: SIMD3<Float>, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), intensity: Float = 1.0) {
         let light = Light()
         light.type = .directional
         light.worldTransform = simd_float4x4(lookAt: target, from: origin, up: up)
         light.color = color
+        light.intensity = intensity
         
         lightsTable[name] = light
         lights.append(light)
     }
     
-    public func addPointLight(name: String, intensity: Float, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1)) {
+    public func addPointLight(name: String, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), intensity: Float = 1.0) {
         let light = Light()
         light.type = .omni
         light.color = color

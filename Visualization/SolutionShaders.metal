@@ -43,7 +43,6 @@ enum AccessMode : uint8_t {
 };
 
 enum LightType : uint {
-    LightTypeAmbient,
     LightTypeDirectional,
     LightTypeOmnidirectional,
 };
@@ -282,11 +281,6 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
         float attenuation;
         
         switch (light.type) {
-            case LightTypeAmbient:
-                L = normalize(-light.direction);
-                attenuation = 1.0;
-                
-                break;
             case LightTypeDirectional:
                 L = normalize(-light.direction);
                 attenuation = 1.0;
@@ -324,7 +318,7 @@ fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
     
     float3 ambient = float3(0.03) * albedo * ambientOcclusion;
     
-    float3 color = ambient + l0; // + emissive;
+    float3 color = ambient + l0 + emissive;
     color = color / (color + float3(1.0));
     color = pow(color, float3(1.0 / 2.4));
     
