@@ -15,7 +15,7 @@ import ModelIO
 import Utilities
 
 fileprivate let MaxOutstandingFrameCount = 3
-fileprivate let MaxConstantsSize = 1024 * 1024
+fileprivate let MaxConstantsSize = 1024 * 1024 * 3
 fileprivate let MinBufferAlignment = 256
 
 // MARK: - Scene Objects
@@ -160,26 +160,43 @@ fileprivate class Node {
     var materials: [Material]
     
     let isDrawable: Bool
+    let isInstanced: Bool
     
-    var transform: simd_float4x4 = matrix_identity_float4x4
+    var transforms: [simd_float4x4] = []
     
-    var worldTransform: simd_float4x4 {
-        if let parentNode {
-            return parentNode.worldTransform * transform
-        } else {
-            return transform
-        }
-    }
-    
-    var position: SIMD3<Float> {
-        return worldTransform.columns.3.xyz
-    }
-    
-    init(name: String, mesh: MTKMesh , materials: [Material], isDrawable: Bool = true) {
+    init(name: String, mesh: MTKMesh , materials: [Material], isDrawable: Bool = true, instances: Int = 1) {
         self.name = name
         self.mesh = mesh
         self.materials = materials
         self.isDrawable = isDrawable
+        
+        if instances == 1 {
+            isInstanced = false
+            transforms = [matrix_identity_float4x4]
+        } else {
+            isInstanced = true
+            transforms = [simd_float4x4](repeating: matrix_identity_float4x4, count: instances)
+        }
+    }
+    
+    func position(at index: Int) -> SIMD3<Float> {
+        return worldTransform(at: index).columns.3.xyz
+    }
+    
+    func worldTransform(at index: Int) -> simd_float4x4 {
+        if let parentNode {
+            return parentNode.worldTransform(at: 0) * transforms[index]
+        } else {
+            return transforms[index]
+        }
+    }
+    
+    var worldTransforms: [simd_float4x4] {
+        if let parentNode {
+            return transforms.map { parentNode.worldTransform(at: 0) * $0 }
+        } else {
+            return transforms
+        }
     }
     
     func addChildNode(_ node: Node) {
@@ -671,15 +688,15 @@ open class Solution3DContext: SolutionContext {
     
     // MARK: - Node Management
     
-    public func addNode(name: String, mesh: String, parent parentName: String? = nil) {
+    public func addNode(name: String, mesh: String, parent parentName: String? = nil, instances: Int = 1) {
         guard let mesh = meshes[mesh] else { return }
         
         let rootNode: Node
         
         if mesh.meshes.count == 1 {
-            rootNode = Node(name: name, mesh: mesh.meshes[0], materials: mesh.materials[0])
+            rootNode = Node(name: name, mesh: mesh.meshes[0], materials: mesh.materials[0], instances: instances)
         } else {
-            rootNode = Node(name: name, mesh: mesh.meshes[0], materials: mesh.materials[0], isDrawable: false)
+            rootNode = Node(name: name, mesh: mesh.meshes[0], materials: mesh.materials[0], isDrawable: false, instances: instances)
             
             for childIndex in 0 ..< mesh.meshes.count {
                 let nodeName = "\(name)_\(childIndex)"
@@ -714,12 +731,12 @@ open class Solution3DContext: SolutionContext {
         nodes.removeAll(where: { $0 === node })
     }
     
-    public func updateNode(name: String, transform: simd_float4x4? = nil, materialIndex: Int = 0, albedo: SIMD3<Float>? = nil, metallic: Float? = nil, roughness: Float? = nil, normal: SIMD3<Float>? = nil, emissive: SIMD3<Float>? = nil, ambientOcclusion: Float? = nil) {
+    public func updateNode(name: String, instance: Int = 0, transform: simd_float4x4? = nil, materialIndex: Int = 0, albedo: SIMD3<Float>? = nil, metallic: Float? = nil, roughness: Float? = nil, normal: SIMD3<Float>? = nil, emissive: SIMD3<Float>? = nil, ambientOcclusion: Float? = nil) {
         guard let node = nodesTable[name] else {
             return
         }
         
-        if let transform { node.transform = transform }
+        if let transform { node.transforms[instance] = transform }
         
         if let albedo { node.materials[materialIndex].albedoValue = albedo }
         if let metallic { node.materials[materialIndex].metallicValue = metallic }
@@ -819,7 +836,6 @@ open class Solution3DContext: SolutionContext {
             encoder.pushDebugGroup("Node \(node.name)")
             
             encoder.setVertexBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
-            encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
         
             for (meshIndex, meshBuffer) in node.mesh.vertexBuffers.enumerated() {
                 encoder.setVertexBuffer(meshBuffer.buffer, offset: meshBuffer.offset, index: meshIndex)
@@ -835,7 +851,7 @@ open class Solution3DContext: SolutionContext {
                 encoder.setFragmentTexture(material.emissiveTexture ?? defaultTexture, index: 4)
                 encoder.setFragmentTexture(material.ambientOcclusionTexture ?? defaultTexture, index: 5)
                                            
-                encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex] + nodeLayout.stride + (materialLayout.stride * submeshIndex), index: 5)
+                encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex] + (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * submeshIndex), index: 5)
                 let indexBuffer = submesh.indexBuffer
                 
                 encoder.drawIndexedPrimitives(
@@ -843,7 +859,8 @@ open class Solution3DContext: SolutionContext {
                     indexCount: submesh.indexCount,
                     indexType: submesh.indexType,
                     indexBuffer: indexBuffer.buffer,
-                    indexBufferOffset: indexBuffer.offset
+                    indexBufferOffset: indexBuffer.offset,
+                    instanceCount: node.transforms.count
                 )
             }
             
@@ -902,14 +919,14 @@ open class Solution3DContext: SolutionContext {
         for node in nodes {
             guard node.isDrawable else { continue }
             
-            var constants = NodeConstants(modelMatrix: node.worldTransform)
+            var constants = node.worldTransforms.map { NodeConstants(modelMatrix: $0) }
             
-            let totalSize = nodeLayout.stride + (materialLayout.stride * node.materials.count)
+            let totalSize = (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * node.materials.count)
             let totalStride = totalSize
             
             let offset = allocateConstantStorage(size: totalSize, alignment: totalStride)
             let constantsPointer = constantBuffer.contents().advanced(by: offset)
-            constantsPointer.copyMemory(from: &constants, byteCount: nodeLayout.size)
+            constantsPointer.copyMemory(from: &constants, byteCount: nodeLayout.stride * node.transforms.count)
             
             for (materialIndex, material) in node.materials.enumerated() {
                 var constants = MaterialConstants(
@@ -927,7 +944,7 @@ open class Solution3DContext: SolutionContext {
                     ambientOcclusionValue: material.ambientOcclusionValue
                 )
                 
-                let constantsPointer = constantBuffer.contents().advanced(by: offset + nodeLayout.stride + (materialLayout.stride * materialIndex))
+                let constantsPointer = constantBuffer.contents().advanced(by: offset + (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * materialIndex))
                 constantsPointer.copyMemory(from: &constants, byteCount: materialLayout.size)
             }
             

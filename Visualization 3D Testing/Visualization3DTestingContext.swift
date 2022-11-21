@@ -24,7 +24,8 @@ class Visualization3DTestingContext: Solution3DContext {
         // try runStoneBlock()
         // try runVikingRoom()
         // try runShiba()
-        try runChaos()
+        // try runChaos()
+        try runInstances()
     }
     
     private func runBoxes() throws {
@@ -95,6 +96,79 @@ class Visualization3DTestingContext: Solution3DContext {
         }
     }
     
+    private func runInstances() throws {
+        let totalBoxes = 20
+        let totalArmadillos = 30
+        
+        try loadMesh(name: "Stone Block", fromResource: "Stone Block", withExtension: "usdz")
+        try loadMesh(name: "Armadillo", fromResource: "Armadillo", withExtension: "usdz")
+        try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
+        try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Starscape")
+        
+        addNode(name: "Skybox", mesh: "Skybox")
+        addNode(name: "Box", mesh: "Stone Block", instances: totalBoxes)
+        addNode(name: "Armadillo", mesh: "Armadillo", instances: totalArmadillos)
+        
+        struct Placement {
+            var position: SIMD3<Float>
+            var rotationAxis: SIMD3<Float>
+            var rotationAngle: Float
+            var angularVelocity: Float
+        }
+        
+        var boxPlacements = (0 ..< totalBoxes).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -10...10), Float.random(in: -10...10), Float.random(in: -20...0)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        var armadilloPlacements = (0 ..< totalArmadillos).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -10...10), Float.random(in: -10...10), Float.random(in: -20...0)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        addDirectLight(name: "Sun", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0), intensity: 2)
+        
+        updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        
+        for frameIndex in 0 ..< 2000 {
+            let time = Float(frameIndex) / Float(frameRate)
+            
+            for index in 0 ..< boxPlacements.count {
+                boxPlacements[index].rotationAngle += boxPlacements[index].angularVelocity * time * 0.01
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.005, 0.005, 0.005))
+                let rotation = simd_float4x4(rotateAbout: boxPlacements[index].rotationAxis, byAngle: boxPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: boxPlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: "Box", instance: index, transform: transform)
+            }
+            
+            for index in 0 ..< armadilloPlacements.count {
+                armadilloPlacements[index].rotationAngle += armadilloPlacements[index].angularVelocity * time * 0.01
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.1, 0.1, 0.1))
+                let rotation = simd_float4x4(rotateAbout: armadilloPlacements[index].rotationAxis, byAngle: armadilloPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: armadilloPlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: "Armadillo", instance: index, transform: transform)
+            }
+            
+            try snapshot()
+        }
+    }
+    
     private func runChaos() throws {
         try loadMesh(name: "Clouds", fromResource: "clouds", withExtension: "obj")
         try loadMesh(name: "Earth", fromResource: "earth", withExtension: "obj")
@@ -134,7 +208,7 @@ class Visualization3DTestingContext: Solution3DContext {
         updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
         
         for index in 0 ..< 2000 {
-            let time = (Float(index) * 16.667) / 1000.0
+            let time = Float(index) / Float(frameRate)
             
             let earthTransform = simd_float4x4(rotateAbout: SIMD3<Float>(1, 0, 0), byAngle: -0.2) * simd_float4x4(rotateAbout: SIMD3<Float>(0, 1, 0), byAngle: time * -0.5)
                 

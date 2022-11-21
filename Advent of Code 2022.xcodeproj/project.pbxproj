@@ -10,6 +10,7 @@
 		D124D8AC291C98030063FBC4 /* Visualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; };
 		D124D8AD291C98030063FBC4 /* Visualization.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D124D8B8291C98D40063FBC4 /* SolutionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D124D8B7291C98D40063FBC4 /* SolutionError.swift */; };
+		D162DFDE292B226900F4217D /* Armadillo.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D162DFDD292B226900F4217D /* Armadillo.usdz */; };
 		D1798C9329203DF6001C64C0 /* Solution3DContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1798C9229203DF6001C64C0 /* Solution3DContext.swift */; };
 		D1798C9529203F8D001C64C0 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1798C9429203F8D001C64C0 /* Utilities.swift */; };
 		D1798C9D292057C1001C64C0 /* Visualization3DTestingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1798C9C292057C1001C64C0 /* Visualization3DTestingApp.swift */; };
@@ -125,6 +126,7 @@
 
 /* Begin PBXFileReference section */
 		D124D8B7291C98D40063FBC4 /* SolutionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolutionError.swift; sourceTree = "<group>"; };
+		D162DFDD292B226900F4217D /* Armadillo.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Armadillo.usdz; sourceTree = "<group>"; };
 		D1798C9229203DF6001C64C0 /* Solution3DContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solution3DContext.swift; sourceTree = "<group>"; };
 		D1798C9429203F8D001C64C0 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		D1798C9A292057C1001C64C0 /* Visualization 3D Testing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Visualization 3D Testing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -249,6 +251,7 @@
 			children = (
 				DC37C6E029281EEA004E00CD /* Rusted Iron */,
 				DC37C6DA2926B844004E00CD /* Stone Block.usdz */,
+				D162DFDD292B226900F4217D /* Armadillo.usdz */,
 				DC37C6D82926B83F004E00CD /* Viking Room.usdz */,
 				DC37C6D62926B839004E00CD /* Shiba.usdz */,
 				D1798CDD292337B4001C64C0 /* Clouds */,
@@ -574,6 +577,7 @@
 				D1798CCF29219101001C64C0 /* spot_triangulated.obj in Resources */,
 				D1798CD629233139001C64C0 /* starscape.png in Resources */,
 				D1798CA5292057C2001C64C0 /* Preview Assets.xcassets in Resources */,
+				D162DFDE292B226900F4217D /* Armadillo.usdz in Resources */,
 				D1798CA1292057C2001C64C0 /* Assets.xcassets in Resources */,
 				D1798CDB292337B2001C64C0 /* clouds.mtl in Resources */,
 				D1798CCC29219101001C64C0 /* spot_triangulated.mtl in Resources */,

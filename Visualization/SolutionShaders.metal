@@ -181,9 +181,12 @@ float3 NormalFromMap(texture2d<float> map, SolutionVertexOut in) {
 }
 
 vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
-                                        constant NodeConstants &node [[buffer(2)]],
-                                        constant FrameConstants &frame [[buffer(3)]])
+                                        constant NodeConstants* nodes [[buffer(2)]],
+                                        constant FrameConstants &frame [[buffer(3)]],
+                                        uint instanceID [[instance_id]])
 {
+    constant NodeConstants& node = nodes[instanceID];
+    
     float4x4 modelMatrix = node.modelMatrix;
     float4x4 modelViewMatrix = frame.viewMatrix * node.modelMatrix;
 
@@ -203,7 +206,6 @@ vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
 }
 
 fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
-                                 constant NodeConstants& node [[buffer(2)]],
                                  constant FrameConstants& frame [[buffer(3)]],
                                  constant Light* lights [[buffer(4)]],
                                  constant MaterialConstants& material [[buffer(5)]],
