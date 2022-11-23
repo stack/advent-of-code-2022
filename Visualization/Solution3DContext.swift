@@ -467,8 +467,8 @@ open class Solution3DContext: SolutionContext {
     
     // MARK: - Asset Management (New)
     
-    public func loadMesh(name: String, fromResource resource: String, withExtension ext: String) throws {
-        guard let url = Bundle.main.url(forResource: resource, withExtension: ext) else {
+    public func loadMesh(name: String, fromResource resource: String) throws {
+        guard let url = Bundle.main.url(forResource: resource, withExtension: "usdz") else {
             throw SolutionError.apiError("No mesh resource for \(name)")
         }
         
@@ -513,7 +513,14 @@ open class Solution3DContext: SolutionContext {
         self.meshes[name] = finalMesh
     }
     
-    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
+    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false,
+                            baseColor: SIMD4<Float> = DefaultBaseColor, baseColorTexture: String? = nil,
+                            emissiveColor: SIMD4<Float> = DefaultEmissiveColor, emissiveTexture: String? = nil,
+                            metallicFactor: Float = DefaultMetallicFactor, metallicTexture: String? = nil,
+                            roughnessFactor: Float = DefaultRoughnessFactor, roughnessTexture: String? = nil,
+                            ambientOcclusionTexture: String? = nil, normalTexture: String? = nil,
+                            opacity: Float = DefaultOpacityValue) throws
+    {
         let mdlMesh = MDLMesh(boxWithExtent: extents, segments: SIMD3<UInt32>(1, 1, 1), inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -528,43 +535,31 @@ open class Solution3DContext: SolutionContext {
         
         var material = Material()
         material.baseColor = baseColor
-        material.metallicFactor = metallic
-        material.roughnessFactor = roughness
-        material.emissiveColor = emissive
+        material.emissiveColor = emissiveColor
+        material.metallicFactor = metallicFactor
+        material.roughnessFactor = roughnessFactor
         material.opacity = opacity
         
-        let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
-        
-        meshes[name] = mesh
-    }
-    
-    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
-        let mdlMesh = MDLMesh(boxWithExtent: extents, segments: SIMD3<UInt32>(1, 1, 1), inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
-        
-        mdlMesh.addOrthTanBasis(
-            forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-            normalAttributeNamed: MDLVertexAttributeNormal,
-            tangentAttributeNamed: MDLVertexAttributeTangent
-        )
-        
-        mdlMesh.vertexDescriptor = mdlVertexDescriptor
-        
-        let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
-        
-        var material = Material()
-        if let baseColor { material.baseColorTexture = textures[baseColor] }
-        if let metallic { material.metallicTexture = textures[metallic] }
-        if let roughness { material.roughnessTexture = textures[roughness] }
-        if let normal { material.normalTexture = textures[normal] }
-        if let emissive { material.emissiveTexture = textures[emissive] }
-        if let ambientOcclusion { material.ambientOcclusionTexture = textures[ambientOcclusion] }
+        if let baseColorTexture { material.baseColorTexture = textures[baseColorTexture] }
+        if let emissiveTexture { material.emissiveTexture = textures[emissiveTexture] }
+        if let metallicTexture { material.metallicTexture = textures[metallicTexture] }
+        if let roughnessTexture { material.roughnessTexture = textures[roughnessTexture] }
+        if let ambientOcclusionTexture { material.ambientOcclusionTexture = textures[ambientOcclusionTexture] }
+        if let normalTexture { material.normalTexture = textures[normalTexture] }
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
         meshes[name] = mesh
     }
     
-    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
+    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one,
+                              baseColor: SIMD4<Float> = DefaultBaseColor, baseColorTexture: String? = nil,
+                              emissiveColor: SIMD4<Float> = DefaultEmissiveColor, emissiveTexture: String? = nil,
+                              metallicFactor: Float = DefaultMetallicFactor, metallicTexture: String? = nil,
+                              roughnessFactor: Float = DefaultRoughnessFactor, roughnessTexture: String? = nil,
+                              ambientOcclusionTexture: String? = nil, normalTexture: String? = nil,
+                              opacity: Float = DefaultOpacityValue) throws
+    {
         let mdlMesh = MDLMesh(planeWithExtent: extents, segments: SIMD2<UInt32>(1, 1), geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -579,43 +574,31 @@ open class Solution3DContext: SolutionContext {
         
         var material = Material()
         material.baseColor = baseColor
-        material.metallicFactor = metallic
-        material.roughnessFactor = roughness
-        material.emissiveColor = emissive
+        material.emissiveColor = emissiveColor
+        material.metallicFactor = metallicFactor
+        material.roughnessFactor = roughnessFactor
         material.opacity = opacity
         
-        let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
-        
-        meshes[name] = mesh
-    }
-    
-    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
-        let mdlMesh = MDLMesh(planeWithExtent: extents, segments: SIMD2<UInt32>(1, 1), geometryType: .triangles, allocator: meshBufferAllocator)
-        
-        mdlMesh.addOrthTanBasis(
-            forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-            normalAttributeNamed: MDLVertexAttributeNormal,
-            tangentAttributeNamed: MDLVertexAttributeTangent
-        )
-        
-        mdlMesh.vertexDescriptor = mdlVertexDescriptor
-        
-        let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
-        
-        var material = Material()
-        if let baseColor { material.baseColorTexture = textures[baseColor] }
-        if let metallic { material.metallicTexture = textures[metallic] }
-        if let roughness { material.roughnessTexture = textures[roughness] }
-        if let normal { material.normalTexture = textures[normal] }
-        if let emissive { material.emissiveTexture = textures[emissive] }
-        if let ambientOcclusion { material.ambientOcclusionTexture = textures[ambientOcclusion] }
+        if let baseColorTexture { material.baseColorTexture = textures[baseColorTexture] }
+        if let emissiveTexture { material.emissiveTexture = textures[emissiveTexture] }
+        if let metallicTexture { material.metallicTexture = textures[metallicTexture] }
+        if let roughnessTexture { material.roughnessTexture = textures[roughnessTexture] }
+        if let ambientOcclusionTexture { material.ambientOcclusionTexture = textures[ambientOcclusionTexture] }
+        if let normalTexture { material.normalTexture = textures[normalTexture] }
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
         meshes[name] = mesh
     }
     
-    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
+    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false,
+                               baseColor: SIMD4<Float> = DefaultBaseColor, baseColorTexture: String? = nil,
+                               emissiveColor: SIMD4<Float> = DefaultEmissiveColor, emissiveTexture: String? = nil,
+                               metallicFactor: Float = DefaultMetallicFactor, metallicTexture: String? = nil,
+                               roughnessFactor: Float = DefaultRoughnessFactor, roughnessTexture: String? = nil,
+                               ambientOcclusionTexture: String? = nil, normalTexture: String? = nil,
+                               opacity: Float = DefaultOpacityValue) throws
+    {
         let mdlMesh = MDLMesh(sphereWithExtent: extents, segments: segments, inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -630,36 +613,17 @@ open class Solution3DContext: SolutionContext {
         
         var material = Material()
         material.baseColor = baseColor
-        material.metallicFactor = metallic
-        material.roughnessFactor = roughness
-        material.emissiveColor = emissive
+        material.emissiveColor = emissiveColor
+        material.metallicFactor = metallicFactor
+        material.roughnessFactor = roughnessFactor
         material.opacity = opacity
         
-        let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
-        
-        meshes[name] = mesh
-    }
-    
-    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
-        let mdlMesh = MDLMesh(sphereWithExtent: extents, segments: segments, inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
-        
-        mdlMesh.addOrthTanBasis(
-            forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-            normalAttributeNamed: MDLVertexAttributeNormal,
-            tangentAttributeNamed: MDLVertexAttributeTangent
-        )
-        
-        mdlMesh.vertexDescriptor = mdlVertexDescriptor
-        
-        let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
-        
-        var material = Material()
-        if let baseColor { material.baseColorTexture = textures[baseColor] }
-        if let metallic { material.metallicTexture = textures[metallic] }
-        if let roughness { material.roughnessTexture = textures[roughness] }
-        if let normal { material.normalTexture = textures[normal] }
-        if let emissive { material.emissiveTexture = textures[emissive] }
-        if let ambientOcclusion { material.ambientOcclusionTexture = textures[ambientOcclusion] }
+        if let baseColorTexture { material.baseColorTexture = textures[baseColorTexture] }
+        if let emissiveTexture { material.emissiveTexture = textures[emissiveTexture] }
+        if let metallicTexture { material.metallicTexture = textures[metallicTexture] }
+        if let roughnessTexture { material.roughnessTexture = textures[roughnessTexture] }
+        if let ambientOcclusionTexture { material.ambientOcclusionTexture = textures[ambientOcclusionTexture] }
+        if let normalTexture { material.normalTexture = textures[normalTexture] }
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
@@ -721,7 +685,7 @@ open class Solution3DContext: SolutionContext {
         nodes.removeAll(where: { $0 === node })
     }
     
-    public func updateNode(name: String, instance: Int = 0, transform: simd_float4x4? = nil, materialIndex: Int = 0, baseColor: SIMD4<Float>? = nil, metallic: Float? = nil, roughness: Float? = nil, emissive: SIMD4<Float>? = nil, ambientOcclusion: Float? = nil, opacity: Float? = nil) {
+    public func updateNode(name: String, instance: Int = 0, transform: simd_float4x4? = nil, materialIndex: Int = 0, baseColor: SIMD4<Float>? = nil, metallicFactor: Float? = nil, roughnessFactor: Float? = nil, emissiveColor: SIMD4<Float>? = nil, opacity: Float? = nil) {
         guard let node = nodesTable[name] else {
             return
         }
@@ -729,9 +693,9 @@ open class Solution3DContext: SolutionContext {
         if let transform { node.transforms[instance] = transform }
         
         if let baseColor { node.materials[materialIndex].baseColor = baseColor }
-        if let metallic { node.materials[materialIndex].metallicFactor = metallic }
-        if let roughness { node.materials[materialIndex].roughnessFactor = roughness }
-        if let emissive { node.materials[materialIndex].emissiveColor = emissive }
+        if let metallicFactor { node.materials[materialIndex].metallicFactor = metallicFactor }
+        if let roughnessFactor { node.materials[materialIndex].roughnessFactor = roughnessFactor }
+        if let emissiveColor { node.materials[materialIndex].emissiveColor = emissiveColor }
         if let opacity { node.materials[materialIndex].opacity = opacity }
     }
     
