@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D11F667A292D1DC60052D191 /* Spot.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D11F6679292D1DC60052D191 /* Spot.usdz */; };
 		D124D8AC291C98030063FBC4 /* Visualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; };
 		D124D8AD291C98030063FBC4 /* Visualization.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D124D8B8291C98D40063FBC4 /* SolutionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D124D8B7291C98D40063FBC4 /* SolutionError.swift */; };
@@ -22,15 +23,16 @@
 		D1798CAE29205836001C64C0 /* Visualization.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D1798CB329205854001C64C0 /* Visualization3DTestingContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1798CB229205854001C64C0 /* Visualization3DTestingContext.swift */; };
 		D1798CB529205A14001C64C0 /* Solution2DContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1798CB429205A14001C64C0 /* Solution2DContext.swift */; };
-		D1798CC129219014001C64C0 /* earth.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CBE29219014001C64C0 /* earth.png */; };
-		D1798CC229219014001C64C0 /* earth.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CBF29219014001C64C0 /* earth.mtl */; };
-		D1798CC329219014001C64C0 /* earth.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC029219014001C64C0 /* earth.obj */; };
-		D1798CCC29219101001C64C0 /* spot_triangulated.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC529219100001C64C0 /* spot_triangulated.mtl */; };
-		D1798CCF29219101001C64C0 /* spot_triangulated.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC829219101001C64C0 /* spot_triangulated.obj */; };
 		D1798CD629233139001C64C0 /* starscape.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD529233139001C64C0 /* starscape.png */; };
-		D1798CDA292337B2001C64C0 /* clouds.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD7292337B2001C64C0 /* clouds.png */; };
-		D1798CDB292337B2001C64C0 /* clouds.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD8292337B2001C64C0 /* clouds.mtl */; };
-		D1798CDC292337B2001C64C0 /* clouds.obj in Resources */ = {isa = PBXBuildFile; fileRef = D1798CD9292337B2001C64C0 /* clouds.obj */; };
+		D1EBBB47292D6000005459F4 /* BlueTile.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB46292D6000005459F4 /* BlueTile.usdz */; };
+		D1EBBB4B292DA68B005459F4 /* Earth.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB4A292DA68B005459F4 /* Earth.usdz */; };
+		D1EBBB4D292DA696005459F4 /* Clouds.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB4C292DA696005459F4 /* Clouds.usdz */; };
+		D1EBBB56292DABE7005459F4 /* Fruit.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB55292DABE7005459F4 /* Fruit.usdz */; };
+		D1EBBB5B292DAECB005459F4 /* RoughMetal.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB57292DAECA005459F4 /* RoughMetal.usdz */; };
+		D1EBBB5C292DAECB005459F4 /* RedPlastic.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB58292DAECA005459F4 /* RedPlastic.usdz */; };
+		D1EBBB5D292DAECB005459F4 /* Concrete.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB59292DAECA005459F4 /* Concrete.usdz */; };
+		D1EBBB5E292DAECB005459F4 /* MetalTiles.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB5A292DAECB005459F4 /* MetalTiles.usdz */; };
+		D1EBBB60292DAED9005459F4 /* Wood.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB5F292DAED9005459F4 /* Wood.usdz */; };
 		DC05ED942914505A004FF9ED /* Utilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC05ED8C2914505A004FF9ED /* Utilities.framework */; };
 		DC05ED992914505A004FF9ED /* UtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05ED982914505A004FF9ED /* UtilitiesTests.swift */; };
 		DC05ED9A2914505A004FF9ED /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = DC05ED8E2914505A004FF9ED /* Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -45,11 +47,9 @@
 		DC05EDC129145268004FF9ED /* SolutionShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C429140CF300C718F3 /* SolutionShaders.metal */; };
 		DC05EDC229145268004FF9ED /* SolutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C829141D1100C718F3 /* SolutionView.swift */; };
 		DC05EDC329145268004FF9ED /* SolutionRenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC54E1C229140A1400C718F3 /* SolutionRenderView.swift */; };
-		DC310E0B29283062004FB3D0 /* spot_material.mtl in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC929219101001C64C0 /* spot_material.mtl */; };
 		DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D62926B839004E00CD /* Shiba.usdz */; };
 		DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D82926B83F004E00CD /* Viking Room.usdz */; };
 		DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6DA2926B844004E00CD /* Stone Block.usdz */; };
-		DC37C6DF2927CC8E004E00CD /* spot_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = D1798CC629219101001C64C0 /* spot_texture.png */; };
 		DC37C6E529281EF3004E00CD /* rustediron2_roughness.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */; };
 		DC37C6E629281EF3004E00CD /* rustediron2_normal.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E229281EF3004E00CD /* rustediron2_normal.png */; };
 		DC37C6E729281EF3004E00CD /* rustediron2_basecolor.png in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */; };
@@ -125,6 +125,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D11F6679292D1DC60052D191 /* Spot.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Spot.usdz; sourceTree = "<group>"; };
 		D124D8B7291C98D40063FBC4 /* SolutionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolutionError.swift; sourceTree = "<group>"; };
 		D162DFDD292B226900F4217D /* Armadillo.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Armadillo.usdz; sourceTree = "<group>"; };
 		D1798C9229203DF6001C64C0 /* Solution3DContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solution3DContext.swift; sourceTree = "<group>"; };
@@ -136,21 +137,17 @@
 		D1798CA4292057C2001C64C0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D1798CB229205854001C64C0 /* Visualization3DTestingContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Visualization3DTestingContext.swift; sourceTree = "<group>"; };
 		D1798CB429205A14001C64C0 /* Solution2DContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solution2DContext.swift; sourceTree = "<group>"; };
-		D1798CBE29219014001C64C0 /* earth.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = earth.png; sourceTree = "<group>"; };
-		D1798CBF29219014001C64C0 /* earth.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = earth.mtl; sourceTree = "<group>"; };
-		D1798CC029219014001C64C0 /* earth.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = earth.obj; sourceTree = "<group>"; };
-		D1798CC429219100001C64C0 /* spot_control_mesh.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = spot_control_mesh.obj; sourceTree = "<group>"; };
-		D1798CC529219100001C64C0 /* spot_triangulated.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = spot_triangulated.mtl; sourceTree = "<group>"; };
-		D1798CC629219101001C64C0 /* spot_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = spot_texture.png; sourceTree = "<group>"; };
-		D1798CC729219101001C64C0 /* spot_texture.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = spot_texture.svg; sourceTree = "<group>"; };
-		D1798CC829219101001C64C0 /* spot_triangulated.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = spot_triangulated.obj; sourceTree = "<group>"; };
-		D1798CC929219101001C64C0 /* spot_material.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = spot_material.mtl; sourceTree = "<group>"; };
-		D1798CCA29219101001C64C0 /* spot_quadrangulated.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = spot_quadrangulated.obj; sourceTree = "<group>"; };
 		D1798CD529233139001C64C0 /* starscape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = starscape.png; sourceTree = "<group>"; };
-		D1798CD7292337B2001C64C0 /* clouds.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = clouds.png; sourceTree = "<group>"; };
-		D1798CD8292337B2001C64C0 /* clouds.mtl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = clouds.mtl; sourceTree = "<group>"; };
-		D1798CD9292337B2001C64C0 /* clouds.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = clouds.obj; sourceTree = "<group>"; };
 		D195B3F8291C5F350045CD79 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D1EBBB46292D6000005459F4 /* BlueTile.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = BlueTile.usdz; sourceTree = "<group>"; };
+		D1EBBB4A292DA68B005459F4 /* Earth.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Earth.usdz; sourceTree = "<group>"; };
+		D1EBBB4C292DA696005459F4 /* Clouds.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Clouds.usdz; sourceTree = "<group>"; };
+		D1EBBB55292DABE7005459F4 /* Fruit.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Fruit.usdz; sourceTree = "<group>"; };
+		D1EBBB57292DAECA005459F4 /* RoughMetal.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = RoughMetal.usdz; sourceTree = "<group>"; };
+		D1EBBB58292DAECA005459F4 /* RedPlastic.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = RedPlastic.usdz; sourceTree = "<group>"; };
+		D1EBBB59292DAECA005459F4 /* Concrete.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Concrete.usdz; sourceTree = "<group>"; };
+		D1EBBB5A292DAECB005459F4 /* MetalTiles.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = MetalTiles.usdz; sourceTree = "<group>"; };
+		D1EBBB5F292DAED9005459F4 /* Wood.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Wood.usdz; sourceTree = "<group>"; };
 		DC05ED8C2914505A004FF9ED /* Utilities.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utilities.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC05ED8E2914505A004FF9ED /* Utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		DC05ED932914505A004FF9ED /* Utilities Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Utilities Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -249,51 +246,43 @@
 		D1798CD2292191C0001C64C0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				DC37C6E029281EEA004E00CD /* Rusted Iron */,
-				DC37C6DA2926B844004E00CD /* Stone Block.usdz */,
-				D162DFDD292B226900F4217D /* Armadillo.usdz */,
-				DC37C6D82926B83F004E00CD /* Viking Room.usdz */,
-				DC37C6D62926B839004E00CD /* Shiba.usdz */,
-				D1798CDD292337B4001C64C0 /* Clouds */,
-				D1798CD4292191D1001C64C0 /* Earth */,
-				D1798CD3292191CB001C64C0 /* Spot */,
-				D1798CD529233139001C64C0 /* starscape.png */,
+				D1EBBB4E292DA85A005459F4 /* Models */,
+				D1EBBB4F292DA86D005459F4 /* Textures */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		D1798CD3292191CB001C64C0 /* Spot */ = {
+		D1EBBB4E292DA85A005459F4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				D1798CC429219100001C64C0 /* spot_control_mesh.obj */,
-				D1798CC929219101001C64C0 /* spot_material.mtl */,
-				D1798CCA29219101001C64C0 /* spot_quadrangulated.obj */,
-				D1798CC629219101001C64C0 /* spot_texture.png */,
-				D1798CC729219101001C64C0 /* spot_texture.svg */,
-				D1798CC529219100001C64C0 /* spot_triangulated.mtl */,
-				D1798CC829219101001C64C0 /* spot_triangulated.obj */,
+				D162DFDD292B226900F4217D /* Armadillo.usdz */,
+				D1EBBB46292D6000005459F4 /* BlueTile.usdz */,
+				D1EBBB4C292DA696005459F4 /* Clouds.usdz */,
+				D1EBBB59292DAECA005459F4 /* Concrete.usdz */,
+				D1EBBB4A292DA68B005459F4 /* Earth.usdz */,
+				D1EBBB55292DABE7005459F4 /* Fruit.usdz */,
+				D1EBBB5A292DAECB005459F4 /* MetalTiles.usdz */,
+				D1EBBB58292DAECA005459F4 /* RedPlastic.usdz */,
+				D1EBBB57292DAECA005459F4 /* RoughMetal.usdz */,
+				DC37C6D62926B839004E00CD /* Shiba.usdz */,
+				D11F6679292D1DC60052D191 /* Spot.usdz */,
+				DC37C6DA2926B844004E00CD /* Stone Block.usdz */,
+				DC37C6D82926B83F004E00CD /* Viking Room.usdz */,
+				D1EBBB5F292DAED9005459F4 /* Wood.usdz */,
 			);
-			path = Spot;
+			path = Models;
 			sourceTree = "<group>";
 		};
-		D1798CD4292191D1001C64C0 /* Earth */ = {
+		D1EBBB4F292DA86D005459F4 /* Textures */ = {
 			isa = PBXGroup;
 			children = (
-				D1798CBF29219014001C64C0 /* earth.mtl */,
-				D1798CC029219014001C64C0 /* earth.obj */,
-				D1798CBE29219014001C64C0 /* earth.png */,
+				DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */,
+				DC37C6E429281EF3004E00CD /* rustediron2_metallic.png */,
+				DC37C6E229281EF3004E00CD /* rustediron2_normal.png */,
+				DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */,
+				D1798CD529233139001C64C0 /* starscape.png */,
 			);
-			path = Earth;
-			sourceTree = "<group>";
-		};
-		D1798CDD292337B4001C64C0 /* Clouds */ = {
-			isa = PBXGroup;
-			children = (
-				D1798CD8292337B2001C64C0 /* clouds.mtl */,
-				D1798CD9292337B2001C64C0 /* clouds.obj */,
-				D1798CD7292337B2001C64C0 /* clouds.png */,
-			);
-			path = Clouds;
+			path = Textures;
 			sourceTree = "<group>";
 		};
 		DC05ED8D2914505A004FF9ED /* Utilities */ = {
@@ -339,17 +328,6 @@
 				DC05EDB52914525D004FF9ED /* Visualization.h */,
 			);
 			path = Visualization;
-			sourceTree = "<group>";
-		};
-		DC37C6E029281EEA004E00CD /* Rusted Iron */ = {
-			isa = PBXGroup;
-			children = (
-				DC37C6E329281EF3004E00CD /* rustediron2_basecolor.png */,
-				DC37C6E429281EF3004E00CD /* rustediron2_metallic.png */,
-				DC37C6E229281EF3004E00CD /* rustediron2_normal.png */,
-				DC37C6E129281EF3004E00CD /* rustediron2_roughness.png */,
-			);
-			path = "Rusted Iron";
 			sourceTree = "<group>";
 		};
 		DC54E1A02913EF3900C718F3 = {
@@ -569,27 +547,27 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DC310E0B29283062004FB3D0 /* spot_material.mtl in Resources */,
+				D1EBBB5C292DAECB005459F4 /* RedPlastic.usdz in Resources */,
+				D1EBBB4B292DA68B005459F4 /* Earth.usdz in Resources */,
 				DC37C6E729281EF3004E00CD /* rustediron2_basecolor.png in Resources */,
-				DC37C6DF2927CC8E004E00CD /* spot_texture.png in Resources */,
-				D1798CC229219014001C64C0 /* earth.mtl in Resources */,
-				D1798CC329219014001C64C0 /* earth.obj in Resources */,
-				D1798CCF29219101001C64C0 /* spot_triangulated.obj in Resources */,
+				D1EBBB4D292DA696005459F4 /* Clouds.usdz in Resources */,
 				D1798CD629233139001C64C0 /* starscape.png in Resources */,
+				D1EBBB60292DAED9005459F4 /* Wood.usdz in Resources */,
 				D1798CA5292057C2001C64C0 /* Preview Assets.xcassets in Resources */,
 				D162DFDE292B226900F4217D /* Armadillo.usdz in Resources */,
+				D1EBBB5E292DAECB005459F4 /* MetalTiles.usdz in Resources */,
 				D1798CA1292057C2001C64C0 /* Assets.xcassets in Resources */,
-				D1798CDB292337B2001C64C0 /* clouds.mtl in Resources */,
-				D1798CCC29219101001C64C0 /* spot_triangulated.mtl in Resources */,
 				DC37C6E629281EF3004E00CD /* rustediron2_normal.png in Resources */,
 				DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */,
 				DC37C6E829281EF3004E00CD /* rustediron2_metallic.png in Resources */,
+				D1EBBB56292DABE7005459F4 /* Fruit.usdz in Resources */,
 				DC37C6E529281EF3004E00CD /* rustediron2_roughness.png in Resources */,
+				D1EBBB5B292DAECB005459F4 /* RoughMetal.usdz in Resources */,
 				DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */,
-				D1798CC129219014001C64C0 /* earth.png in Resources */,
-				D1798CDC292337B2001C64C0 /* clouds.obj in Resources */,
+				D1EBBB47292D6000005459F4 /* BlueTile.usdz in Resources */,
 				DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */,
-				D1798CDA292337B2001C64C0 /* clouds.png in Resources */,
+				D1EBBB5D292DAECB005459F4 /* Concrete.usdz in Resources */,
+				D11F667A292D1DC60052D191 /* Spot.usdz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -149,6 +149,10 @@ public extension simd_float4x4 {
             SIMD4<Float>(0,  0, tz,  0)
         )
     }
+    
+    var upperLeft3x3: float3x3 {
+        return float3x3(columns.0.xyz, columns.1.xyz, columns.2.xyz)
+    }
 }
 
 public extension simd_quatf {

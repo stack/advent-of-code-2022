@@ -25,20 +25,57 @@ class Visualization3DTestingContext: Solution3DContext {
         // try runVikingRoom()
         // try runShiba()
         // try runChaos()
-        try runInstances()
+        // try runInstances()
+        try runBlueBox()
     }
     
+    private func runBlueBox() throws {
+        try loadMesh(name: "BlueTile", fromResource: "BlueTile", withExtension: "usdz")
+        try loadMesh(name: "MetalTiles", fromResource: "MetalTiles", withExtension: "usdz")
+        try loadMesh(name: "Concrete", fromResource: "Concrete", withExtension: "usdz")
+        try loadMesh(name: "RedPlastic", fromResource: "RedPlastic", withExtension: "usdz")
+        try loadMesh(name: "RoughMetal", fromResource: "RoughMetal", withExtension: "usdz")
+        try loadMesh(name: "Wood", fromResource: "Wood", withExtension: "usdz")
+        
+        addNode(name: "Blue Box", mesh: "BlueTile")
+        addNode(name: "MetalTiles", mesh: "MetalTiles")
+        addNode(name: "Concrete", mesh: "Concrete")
+        addNode(name: "RedPlastic", mesh: "RedPlastic")
+        addNode(name: "RoughMetal", mesh: "RoughMetal")
+        addNode(name: "Wood", mesh: "Wood")
+        
+        updateNode(name: "Blue Box", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, 0.6, 0.0)))
+        updateNode(name: "MetalTiles", transform: simd_float4x4(translate: SIMD3<Float>(0.0, 0.6, 0.0)))
+        updateNode(name: "Concrete", transform: simd_float4x4(translate: SIMD3<Float>(1.2, 0.6, 0.0)))
+        updateNode(name: "RedPlastic", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, -0.6, 0.0)))
+        updateNode(name: "RoughMetal", transform: simd_float4x4(translate: SIMD3<Float>(0.0, -0.6, 0.0)))
+        updateNode(name: "Wood", transform: simd_float4x4(translate: SIMD3<Float>(1.2, -0.6, 0.0)))
+        
+        addPointLight(name: "Light 1", intensity: 25)
+        addPointLight(name: "Light 2", intensity: 50)
+        addPointLight(name: "Light 3", intensity: 50)
+        addPointLight(name: "Light 4", intensity: 150)
+        
+        updateLight(name: "Light 1", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 2", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 3", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, -6), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 4", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 0, 6), up: SIMD3<Float>(0, 1, 0)))
+        
+        updateCamera(eye: SIMD3<Float>(0.0, 0.2, 3.0), lookAt: normalize(SIMD3<Float>(0.0, 0.0, -1.0)), up: SIMD3<Float>(0, 1, 0))
+        
+        for _ in 0 ..< 2000 {
+            try snapshot()
+        }
+    }
     private func runBoxes() throws {
-        try loadBoxMesh(name: "Red Box", albedo: SIMD3<Float>(1.0, 0.0, 0.0), ambientOcclusion: 1.0)
+        try loadBoxMesh(name: "Red Box", baseColor: SIMD4<Float>(1.0, 0.0, 0.0, 1.0))
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
         
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        
-        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, -1), up: SIMD3<Float>(0, 1, 0))
         
         let numberOfRows: Float = 7.0
         let numberOfColumns: Float = 7.0
@@ -63,9 +100,6 @@ class Visualization3DTestingContext: Solution3DContext {
                 
                 addNode(name: name, mesh: "Red Box")
                 updateNode(name: name, transform: transform, metallic: metallic, roughness: roughness)
-                
-                print("\(name) -> \(translation)")
-                print("-   \(metallic) / \(roughness)")
             }
         }
         
@@ -96,91 +130,18 @@ class Visualization3DTestingContext: Solution3DContext {
         }
     }
     
-    private func runInstances() throws {
-        let totalBoxes = 20
-        let totalArmadillos = 30
-        
-        try loadMesh(name: "Stone Block", fromResource: "Stone Block", withExtension: "usdz")
-        try loadMesh(name: "Armadillo", fromResource: "Armadillo", withExtension: "usdz")
-        try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
-        try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Starscape")
-        
-        addNode(name: "Skybox", mesh: "Skybox")
-        addNode(name: "Box", mesh: "Stone Block", instances: totalBoxes)
-        addNode(name: "Armadillo", mesh: "Armadillo", instances: totalArmadillos)
-        
-        struct Placement {
-            var position: SIMD3<Float>
-            var rotationAxis: SIMD3<Float>
-            var rotationAngle: Float
-            var angularVelocity: Float
-        }
-        
-        var boxPlacements = (0 ..< totalBoxes).map { _ in
-            Placement(
-                position: SIMD3<Float>(Float.random(in: -10...10), Float.random(in: -10...10), Float.random(in: -20...0)),
-                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
-                rotationAngle: 0,
-                angularVelocity: Float.random(in: -0.5...0.5)
-            )
-        }
-        
-        var armadilloPlacements = (0 ..< totalArmadillos).map { _ in
-            Placement(
-                position: SIMD3<Float>(Float.random(in: -10...10), Float.random(in: -10...10), Float.random(in: -20...0)),
-                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
-                rotationAngle: 0,
-                angularVelocity: Float.random(in: -0.5...0.5)
-            )
-        }
-        
-        addDirectLight(name: "Sun", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0), intensity: 2)
-        
-        updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
-        
-        for frameIndex in 0 ..< 2000 {
-            let time = Float(frameIndex) / Float(frameRate)
-            
-            for index in 0 ..< boxPlacements.count {
-                boxPlacements[index].rotationAngle += boxPlacements[index].angularVelocity * time * 0.01
-                
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.005, 0.005, 0.005))
-                let rotation = simd_float4x4(rotateAbout: boxPlacements[index].rotationAxis, byAngle: boxPlacements[index].rotationAngle)
-                let translation = simd_float4x4(translate: boxPlacements[index].position)
-                
-                let transform = translation * rotation * scale
-                
-                updateNode(name: "Box", instance: index, transform: transform)
-            }
-            
-            for index in 0 ..< armadilloPlacements.count {
-                armadilloPlacements[index].rotationAngle += armadilloPlacements[index].angularVelocity * time * 0.01
-                
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.1, 0.1, 0.1))
-                let rotation = simd_float4x4(rotateAbout: armadilloPlacements[index].rotationAxis, byAngle: armadilloPlacements[index].rotationAngle)
-                let translation = simd_float4x4(translate: armadilloPlacements[index].position)
-                
-                let transform = translation * rotation * scale
-                
-                updateNode(name: "Armadillo", instance: index, transform: transform)
-            }
-            
-            try snapshot()
-        }
-    }
-    
     private func runChaos() throws {
-        try loadMesh(name: "Clouds", fromResource: "clouds", withExtension: "obj")
-        try loadMesh(name: "Earth", fromResource: "earth", withExtension: "obj")
-        try loadMesh(name: "Spot", fromResource: "spot_triangulated", withExtension: "obj")
+        try loadMesh(name: "Clouds", fromResource: "Clouds", withExtension: "usdz")
+        try loadMesh(name: "Earth", fromResource: "Earth", withExtension: "usdz")
+        try loadMesh(name: "Spot", fromResource: "Spot", withExtension: "usdz")
         try loadMesh(name: "Stone Block", fromResource: "Stone Block", withExtension: "usdz")
         
         try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
         
         try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Starscape")
-        try loadSphereMesh(name: "Light", extents: SIMD3<Float>(1, 1, 1), segments: SIMD2<UInt32>(24, 24), albedo: SIMD3<Float>(1.0, 1.0, 1.0), roughness: 0.5)
-        try loadBoxMesh(name: "Cube", extents: SIMD3<Float>(1, 1, 1), albedo: SIMD3<Float>(1.0, 1.0, 1.0))
-        try loadPlaneMesh(name: "Plane", extents: SIMD3<Float>(1, 1, 0), albedo: SIMD3<Float>(0.5, 0.5, 0.5))
+        try loadSphereMesh(name: "Light", extents: SIMD3<Float>(1, 1, 1), segments: SIMD2<UInt32>(24, 24), baseColor: SIMD4<Float>(1.0, 1.0, 1.0, 1.0), roughness: 0.5)
+        try loadBoxMesh(name: "Cube", extents: SIMD3<Float>(1, 1, 1), baseColor: SIMD4<Float>(1.0, 1.0, 1.0, 1.0))
+        try loadPlaneMesh(name: "Plane", extents: SIMD3<Float>(1, 1, 0), baseColor: SIMD4<Float>(0.5, 0.5, 0.5, 1.0))
         
         addNode(name: "Skybox", mesh: "Skybox")
         addNode(name: "Earth", mesh: "Earth")
@@ -193,15 +154,17 @@ class Visualization3DTestingContext: Solution3DContext {
         addNode(name: "Point 1", mesh: "Light")
         addNode(name: "Point 2", mesh: "Light")
         
-        updateNode(name: "Cube 1", albedo: SIMD3<Float>(1, 0, 0), metallic: 0.1, roughness: 0.1)
-        updateNode(name: "Cube 2", albedo: SIMD3<Float>(0, 1, 0), metallic: 1.0, roughness: 0.5)
+        updateNode(name: "Skybox", baseColor: SIMD4<Float>(0, 0, 0, 1))
         
-        updateNode(name: "Point 1", albedo: SIMD3<Float>(1, 1, 0))
-        updateNode(name: "Point 2", albedo: SIMD3<Float>(0, 1, 1))
+        updateNode(name: "Cube 1", baseColor: SIMD4<Float>(1, 0, 0, 1), metallic: 0.1, roughness: 0.1)
+        updateNode(name: "Cube 2", baseColor: SIMD4<Float>(0, 1, 0, 1), metallic: 1.0, roughness: 0.5)
         
-        addDirectLight(name: "Sun 1", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
-        addDirectLight(name: "Sun 2", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
-        addDirectLight(name: "Sun 3", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 0.75)
+        updateNode(name: "Point 1", baseColor: SIMD4<Float>(1, 1, 0, 1))
+        updateNode(name: "Point 2", baseColor: SIMD4<Float>(0, 1, 1, 1))
+        
+        addDirectLight(name: "Sun 1", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 1)
+        addDirectLight(name: "Sun 2", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 1)
+        addDirectLight(name: "Sun 3", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-1, 1, 1), up: SIMD3<Float>(0, 1, 0), color: SIMD3<Float>(1, 1, 1), intensity: 1)
         addPointLight(name: "Point 1", color: SIMD3<Float>(1, 1, 0), intensity: 1.0)
         addPointLight(name: "Point 2", color: SIMD3<Float>(0, 1, 1), intensity: 1.0)
         
@@ -262,22 +225,124 @@ class Visualization3DTestingContext: Solution3DContext {
         }
     }
     
+    private func runInstances() throws {
+        let totalBoxes = 20
+        let totalArmadillos = 30
+        let totalSlimes = 10
+        
+        try loadMesh(name: "Stone Block", fromResource: "Stone Block", withExtension: "usdz")
+        try loadMesh(name: "Armadillo", fromResource: "Armadillo", withExtension: "usdz")
+        try loadMesh(name: "Fruit", fromResource: "Fruit", withExtension: "usdz")
+        try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
+        try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, emissive: "Starscape")
+        
+        addNode(name: "Skybox", mesh: "Skybox")
+        addNode(name: "Box", mesh: "Stone Block", instances: totalBoxes)
+        addNode(name: "Armadillo", mesh: "Armadillo", instances: totalArmadillos)
+        addNode(name: "Fruit", mesh: "Fruit", instances: totalSlimes)
+        
+        updateNode(name: "Skybox", baseColor: SIMD4<Float>(0, 0, 0, 1))
+        
+        struct Placement {
+            var position: SIMD3<Float>
+            var rotationAxis: SIMD3<Float>
+            var rotationAngle: Float
+            var angularVelocity: Float
+        }
+        
+        var boxPlacements = (0 ..< totalBoxes).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -10...10), Float.random(in: -10...10), Float.random(in: -20...0)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        var armadilloPlacements = (0 ..< totalArmadillos).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -5...5), Float.random(in: -5...5), Float.random(in: -10 ... -2)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        var slimePlacements = (0 ..< totalSlimes).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -5...5), Float.random(in: -5...5), Float.random(in: -10 ... -2)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        addDirectLight(name: "Sun", lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 0, 4), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addPointLight(name: "Point 1", color: SIMD3<Float>(0, 0.75, 0.75), intensity: 40.0)
+        
+        updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        
+        for frameIndex in 0 ..< 2000 {
+            let time = Float(frameIndex) / Float(frameRate)
+            let timeStep = 1.0 / Float(frameRate)
+            
+            for index in 0 ..< boxPlacements.count {
+                boxPlacements[index].rotationAngle += boxPlacements[index].angularVelocity * timeStep * 2
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.005, 0.005, 0.005))
+                let rotation = simd_float4x4(rotateAbout: boxPlacements[index].rotationAxis, byAngle: boxPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: boxPlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: "Box", instance: index, transform: transform)
+            }
+            
+            for index in 0 ..< armadilloPlacements.count {
+                armadilloPlacements[index].rotationAngle += armadilloPlacements[index].angularVelocity * timeStep * 2
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.2, 0.2, 0.2))
+                let rotation = simd_float4x4(rotateAbout: armadilloPlacements[index].rotationAxis, byAngle: armadilloPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: armadilloPlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: "Armadillo", instance: index, transform: transform)
+            }
+            
+            for index in 0 ..< slimePlacements.count {
+                slimePlacements[index].rotationAngle += slimePlacements[index].angularVelocity * timeStep * 2
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.05, 0.05, 0.05))
+                let rotation = simd_float4x4(rotateAbout: slimePlacements[index].rotationAxis, byAngle: slimePlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: slimePlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: "Fruit", instance: index, transform: transform)
+            }
+            
+            let percentTime = Float(frameIndex) / 2000
+            updateLight(name: "Point 1", transform: simd_float4x4(translate: SIMD3<Float>(0, 0, percentTime * -10.0)))
+            
+            try snapshot()
+        }
+    }
+    
     private func runMetalSpheres() throws {
         try loadTexture(name: "Rusted Iron Albedo", resource: "rustediron2_basecolor", withExtension: "png")
         try loadTexture(name: "Rusted Iron Metallic", resource: "rustediron2_metallic", withExtension: "png")
         try loadTexture(name: "Rusted Iron Normal", resource: "rustediron2_normal", withExtension: "png")
         try loadTexture(name: "Rusted Iron Roughness", resource: "rustediron2_roughness", withExtension: "png")
         
-        try loadSphereMesh(name: "Iron Sphere", albedo: "Rusted Iron Albedo", metallic: "Rusted Iron Metallic", roughness: "Rusted Iron Roughness", normal: "Rusted Iron Normal")
+        try loadSphereMesh(name: "Iron Sphere", baseColor: "Rusted Iron Albedo", metallic: "Rusted Iron Metallic", roughness: "Rusted Iron Roughness", normal: "Rusted Iron Normal")
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 1)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 1)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 1)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 1)
         
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        
-        updateCamera(eye: SIMD3<Float>(0, 0, 3), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 0, 3), lookAt: SIMD3<Float>(0, 0, -1), up: SIMD3<Float>(0, 1, 0))
         
         let numberOfRows: Float = 3.0
         let numberOfColumns: Float = 3.0
@@ -286,7 +351,7 @@ class Visualization3DTestingContext: Solution3DContext {
         
         for row in 0 ..< Int(numberOfRows) {
             for column in 0 ..< Int(numberOfColumns) {
-                let index = (row * 7) + column
+                let index = (row * Int(numberOfColumns)) + column
                 
                 let name = "Sphere \(index)"
                 
@@ -308,7 +373,7 @@ class Visualization3DTestingContext: Solution3DContext {
             
             for row in 0 ..< Int(numberOfRows) {
                 for column in 0 ..< Int(numberOfColumns) {
-                    let index = (row * 7) + column
+                    let index = (row * Int(numberOfColumns)) + column
                     
                     let name = "Sphere \(index)"
                     
@@ -331,21 +396,19 @@ class Visualization3DTestingContext: Solution3DContext {
     }
     
     private func runSpheres() throws {
-        try loadSphereMesh(name: "Red Sphere", albedo: SIMD3<Float>(1.0, 0.0, 0.0), ambientOcclusion: 1.0)
+        try loadSphereMesh(name: "Red Sphere", baseColor: SIMD4<Float>(1.0, 0.0, 0.0, 1.0))
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
         
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        
-        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, -1), up: SIMD3<Float>(0, 1, 0))
         
         let numberOfRows: Float = 7.0
         let numberOfColumns: Float = 7.0
         let spacing: Float = 0.6
-        let scale: Float = 0.4
+        let scale: Float = 0.6
         
         for row in 0 ..< Int(numberOfRows) {
             for column in 0 ..< Int(numberOfColumns) {
@@ -362,9 +425,6 @@ class Visualization3DTestingContext: Solution3DContext {
                 )
                 
                 let transform = simd_float4x4(translate: translation) * simd_float4x4(scale: SIMD3<Float>(scale, scale, scale))
-                
-                print("\(name) -> \(translation)")
-                print("-   \(metallic) / \(roughness)")
                 
                 addNode(name: name, mesh: "Red Sphere")
                 updateNode(name: name, transform: transform, metallic: metallic, roughness: roughness)
@@ -401,16 +461,14 @@ class Visualization3DTestingContext: Solution3DContext {
     private func runShiba() throws {
         try loadMesh(name: "Shiba", fromResource: "Shiba", withExtension: "usdz")
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
-        
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
         
         addNode(name: "Shiba", mesh: "Shiba")
         
-        updateCamera(eye: SIMD3<Float>(0, 1, 3), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 1, 3), lookAt: SIMD3<Float>(0, -1, -3), up: SIMD3<Float>(0, 1, 0))
         
         for index in 0 ..< 2000 {
             let time = Float(index) / Float(frameRate)
@@ -427,16 +485,14 @@ class Visualization3DTestingContext: Solution3DContext {
     private func runStoneBlock() throws {
         try loadMesh(name: "Stone Block", fromResource: "Stone Block", withExtension: "usdz")
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
-        
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
         
         addNode(name: "Stone Block", mesh: "Stone Block")
         
-        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 0, 5), lookAt: SIMD3<Float>(0, 0, -1), up: SIMD3<Float>(0, 1, 0))
         
         for index in 0 ..< 2000 {
             let time = Float(index) / Float(frameRate)
@@ -454,16 +510,15 @@ class Visualization3DTestingContext: Solution3DContext {
     private func runVikingRoom() throws {
         try loadMesh(name: "Viking Room", fromResource: "Viking Room", withExtension: "usdz")
         
-        let lightIntensity = SIMD3<Float>(1, 1, 1)
         
-        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
-        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), color: lightIntensity)
+        addDirectLight(name: "Light 0", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 1", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0,  10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 2", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>(-10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
+        addDirectLight(name: "Light 3", lookAt: SIMD3<Float>(0, 0, 0.0), from: SIMD3<Float>( 10.0, -10.0, 10.0), up: SIMD3<Float>(0, 1, 0), intensity: 3)
         
         addNode(name: "Viking Room", mesh: "Viking Room")
         
-        updateCamera(eye: SIMD3<Float>(0, 1, 8), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        updateCamera(eye: SIMD3<Float>(0, 1, 8), lookAt: SIMD3<Float>(0, 0, -1), up: SIMD3<Float>(0, 1, 0))
         
         for index in 0 ..< 2000 {
             let time = Float(index) / Float(frameRate)

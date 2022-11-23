@@ -9,6 +9,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
+// MARK: - Presentation Shaders
+
 struct VertexIn {
     float2 position          [[attribute(0)]];
     float2 textureCoordinate [[attribute(1)]];
@@ -37,292 +39,248 @@ fragment float4 FragmentShader(VertexOut out [[ stage_in ]],
     return color;
 }
 
-enum AccessMode : uint8_t {
-    AccessModeValue,
-    AccessModeTexture
+// MARK: - Rendering Shaders
+
+enum {
+    VertexAttributePosition,
+    VertexAttributeNormal,
+    VertexAttributeTangent,
+    VertexAttributeTexCoords
 };
 
-enum LightType : uint {
-    LightTypeDirectional,
-    LightTypeOmnidirectional,
+enum class VertexBuffer : int {
+    vertexAttributes = 0,
+    nodeConstants = 8,
+    frameConstants = 9,
+    lightConstants = 10
+};
+    
+enum class FragmentBuffer: int {
+    frameConstants,
+    lightConstants,
+    materialConstants,
+};
+    
+enum class FragmentTexture : int {
+    baseColor,
+    emissive,
+    normal,
+    metallic,
+    roughness,
+    ambientOcclusion
+};
+    
+struct FrameConstants {
+    float4x4 viewMatrix;
+    float4x4 viewProjectionMatrix;
+    uint lightCount;
+};
+    
+struct NodeConstants {
+    float4x4 modelMatrix;
+    float3x3 normalMatrix;
+};
+    
+struct MaterialConstants {
+    float4 baseColor;
+    float4 emissiveColor;
+    float metallicFactor;
+    float roughnessFactor;
+    float occlusionWeight;
+    float opacity;
+};
+    
+struct Material {
+    float4 baseColor;
+    float metalness;
+    float roughness;
+    float ambientOcclusion;
+};
+    
+struct Surface {
+    float3 reflected { 0 };
+    float3 emitted { 0 };
 };
 
 struct Light {
-    float4x4 viewProjectionMatrix;
-    float3 intensity; // product of color and intensity
-    float3 position; // world-space position
-    float3 direction; // view-space direction
-    LightType type;
+    float4 position;
+    float4 direction; // w = 1 means punctual; w = 0 means directional
+    float4 intensity; // product of color and intensity
+    
+    float3 directionToPoint(float3 p) {
+        if (direction.w == 0) {
+            return -direction.xyz;
+        } else {
+            return p - position.xyz;
+        }
+    }
+    
+    float3 evaluateIntensity(float3 toLight) {
+        if (direction.w == 0) {
+            return intensity.rgb;
+        } else {
+            float lightDistanceSquared = dot(toLight, toLight);
+            float attenuation = 1.0f / max(lightDistanceSquared, 1e-4);
+            
+            return attenuation * intensity.rgb;
+        }
+    }
 };
 
 struct SolutionVertexIn {
-    float3 position  [[attribute(0)]];
-    float3 normal    [[attribute(1)]];
-    float3 tangents  [[attribute(2)]];
-    float2 texCoords [[attribute(3)]];
+    float3 position  [[attribute(VertexAttributePosition)]];
+    float3 normal    [[attribute(VertexAttributeNormal)]];
+    float4 tangent   [[attribute(VertexAttributeTangent)]];
+    float2 texCoords [[attribute(VertexAttributeTexCoords)]];
 };
 
 struct SolutionVertexOut {
-    float4 position [[position]];
-    float3 worldPosition;
-    float3 viewPosition;
-    float3 normal;
+    float4 clipPosition [[position]];
+    float3 eyePosition;
+    float3 eyeNormal;
+    float3 eyeTangent;
+    float tangentSign [[flat]];
     float2 texCoords;
 };
 
-struct NodeConstants {
-    float4x4 modelMatrix;
-};
-
-struct MaterialConstants {
-    AccessMode albedoMode;
-    float3 albedoValue;
-    
-    AccessMode metallicMode;
-    float metallicValue;
-    
-    AccessMode roughnessMode;
-    float roughnessValue;
-    
-    AccessMode normalMode;
-    float3 normalValue;
-    
-    AccessMode emissiveMode;
-    float3 emissiveValue;
-    
-    AccessMode ambientOcclusionMode;
-    float ambientOcclusionValue;
-};
-
-struct FrameConstants {
-    float4x4 projectionMatrix;
-    float4x4 viewMatrix;
-    uint lightCount;
-};
-
-float DistanceAttenuation(constant Light &light, float3 toLight) {
-    switch (light.type) {
-        case LightTypeOmnidirectional: {
-            float lightDistSq = dot(toLight, toLight);
-            return 1.0f / max(lightDistSq, 1e-4);
-            break;
-        }
-        default:
-            return 1.0;
-    }
+constexpr float3 F0FromIoR(float ior) {
+    float k = (1.0f - ior) / (1.0f + ior);
+    return k * k;
 }
 
-float DistributionGGX(float3 N, float3 H, float roughness) {
-    float a = roughness * roughness;
-    float a2 = a * 2;
-    
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH * NdotH;
-    
-    float numerator = a2;
-    float denominator = (NdotH2 * (a2 - 1.0) + 1.0);
-    denominator = M_PI_F * denominator * denominator;
-    
-    return numerator / denominator;
+float G1_GGX(float alphaSq, float NdotX) {
+    float cosSq = NdotX * NdotX;
+    float tanSq = (1.0f - cosSq) / max(cosSq, 1e-4);
+    return 2.0f / (1.0f + sqrt(1.0f + alphaSq * tanSq));
 }
 
-float3 FresnelSchlick(float cosTheta, float3 f0) {
-    return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+float GJointSmith(float alphaSq, float NdotL, float NdotV) {
+    return G1_GGX(alphaSq, NdotL) * G1_GGX(alphaSq, NdotV);
 }
 
-float GeometorySchlickGGX(float NdotV, float roughtness) {
-    float r = (roughtness + 1.0);
-    float k = (r * r) / 8.0;
-    
-    float numerator = NdotV;
-    float denominator = NdotV * (1.0 - k) + k;
-    
-    return numerator / denominator;
+float DTrowbridgeReitz(float alphaSq, float NdotH) {
+    float c = (NdotH * NdotH) * (alphaSq - 1.0f) + 1.0f;
+    return step(0.0f, NdotH) * alphaSq / (M_PI_F * (c * c));
+}
+float3 FSchlick(float3 F0, float VdotH) {
+    return F0 + (1.0f - F0) * powr(1.0f - abs(VdotH), 5.0f);
 }
 
-float GeometrySmith(float3 N, float3 V, float3 L, float roughess) {
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = GeometorySchlickGGX(NdotV, roughess);
-    float ggx1 = GeometorySchlickGGX(NdotL, roughess);
-    
-    return ggx1 * ggx2;
+float3 Lambertian(float3 diffuseColor) {
+    return diffuseColor * (1.0f / M_PI_F);
 }
 
-#define SRGB_ALPHA 0.055
+float3 BRDF(thread Material &material, float NdotL, float NdotV, float NdotH, float VdotH) {
+    float3 baseColor = material.baseColor.rgb;
+    float3 diffuseColor = mix(baseColor, float3(0.0f), material.metalness);
 
-float LinearFromSRGB(float x) {
-    if (x <= 0.04045)
-        return x / 12.92;
-    else
-        return powr((x + SRGB_ALPHA) / (1.0 + SRGB_ALPHA), 2.4);
+    float3 fd = Lambertian(diffuseColor) * material.ambientOcclusion;
+
+    const float3 DielectricF0 = 0.04f; // This results from assuming an IOR of 1.5, the average for common dielectrics
+    float3 F0 = mix(DielectricF0, baseColor, material.metalness);
+    float alpha = material.roughness * material.roughness;
+    float alphaSq = alpha * alpha;
+
+    float D = DTrowbridgeReitz(alphaSq, NdotH);
+    float G = GJointSmith(alphaSq, NdotL, NdotV);
+    float3 F = FSchlick(F0, VdotH);
+
+    float3 fs = (D * G * F) / (4.0f * abs(NdotL) * abs(NdotV));
+
+    return fd + fs;
 }
 
-float3 LinearFromSRGB(float3 rgb) {
-    return float3(LinearFromSRGB(rgb.r), LinearFromSRGB(rgb.g), LinearFromSRGB(rgb.b));
-}
-
-float3 NormalFromMap(texture2d<float> map, SolutionVertexOut in) {
-    constexpr sampler normalSampler(filter::nearest);
-    
-    float3 tangentNormal = map.sample(normalSampler, in.texCoords).xyz;
-    
-    float3 q1 = dfdx(in.viewPosition);
-    float3 q2 = dfdy(in.viewPosition);
-    float2 st1 = dfdx(in.texCoords);
-    float2 st2 = dfdy(in.texCoords);
-    
-    float3 N = normalize(in.normal);
-    float3 T = normalize(q1 * st2.y - q2 * st1.y);
-    float3 B = -normalize(cross(N, T));
-    float3x3 TBN = float3x3(T, B, N);
-    
-    return normalize(TBN * tangentNormal);
+float remap(float sourceMin, float sourceMax, float destMin, float destMax, float t) {
+    float f = (t - sourceMin) / (sourceMax - sourceMin);
+    return mix(destMin, destMax, f);
 }
 
 vertex SolutionVertexOut SolutionVertex(SolutionVertexIn in [[stage_in]],
-                                        constant NodeConstants* nodes [[buffer(2)]],
-                                        constant FrameConstants &frame [[buffer(3)]],
+                                        constant NodeConstants* nodes [[buffer(VertexBuffer::nodeConstants)]],
+                                        constant FrameConstants &frame [[buffer(VertexBuffer::frameConstants)]],
                                         uint instanceID [[instance_id]])
 {
     constant NodeConstants& node = nodes[instanceID];
     
-    float4x4 modelMatrix = node.modelMatrix;
-    float4x4 modelViewMatrix = frame.viewMatrix * node.modelMatrix;
-
-    float4 worldPosition = modelMatrix * float4(in.position, 1.0);
-
-    float4 viewPosition = frame.viewMatrix * worldPosition;
-    float4 viewNormal = modelViewMatrix * float4(in.normal, 0.0);
-
+    float4 modelPosition = float4(in.position, 1.0f);
+    float4 worldPosition = node.modelMatrix * modelPosition;
+    float4 eyePosition = frame.viewMatrix * worldPosition;
+    
     SolutionVertexOut out;
-    out.position = frame.projectionMatrix * viewPosition;
-    out.worldPosition = worldPosition.xyz;
-    out.viewPosition = viewPosition.xyz;
-    out.normal = viewNormal.xyz;
+    out.clipPosition = frame.viewProjectionMatrix * worldPosition;
+    out.eyePosition = eyePosition.xyz;
+    out.eyeNormal = normalize(node.normalMatrix * in.normal);
+    out.eyeTangent = normalize(node.normalMatrix * in.tangent.xyz);
+    out.tangentSign = in.tangent.w;
     out.texCoords = in.texCoords;
     
     return out;
 }
 
-fragment float4 SolutionFragment(SolutionVertexOut in [[stage_in]],
-                                 constant FrameConstants& frame [[buffer(3)]],
-                                 constant Light* lights [[buffer(4)]],
-                                 constant MaterialConstants& material [[buffer(5)]],
-                                 texture2d<float, access::sample> albedoTexture [[texture(0)]],
-                                 texture2d<float, access::sample> metallicTexture [[texture(1)]],
-                                 texture2d<float, access::sample> roughnessTexture [[texture(2)]],
-                                 texture2d<float, access::sample> normalTexture [[texture(3)]],
-                                 texture2d<float, access::sample> emissiveTexture [[texture(4)]],
-                                 texture2d<float, access::sample> ambientOcclusionTexture [[texture(5)]],
-                                 sampler textureSampler [[sampler(0)]])
+fragment float4 SolutionFragment(SolutionVertexOut in                                     [[stage_in]],
+                                 constant FrameConstants& frame                           [[buffer(FragmentBuffer::frameConstants)]],
+                                 constant Light* lights                                   [[buffer(FragmentBuffer::lightConstants)]],
+                                 constant MaterialConstants& materialProperties           [[buffer(FragmentBuffer::materialConstants)]],
+                                 texture2d<float, access::sample> baseColorTexture        [[texture(FragmentTexture::baseColor)]],
+                                 texture2d<float, access::sample> emissiveTexture         [[texture(FragmentTexture::emissive)]],
+                                 texture2d<float, access::sample> normalTexture           [[texture(FragmentTexture::normal)]],
+                                 texture2d<float, access::sample> metallicTexture         [[texture(FragmentTexture::metallic)]],
+                                 texture2d<float, access::sample> roughnessTexture        [[texture(FragmentTexture::roughness)]],
+                                 texture2d<float, access::sample> ambientOcclusionTexture [[texture(FragmentTexture::ambientOcclusion)]])
 {
-    float3 albedo;
-    float alpha;
+    constexpr sampler repeatSampler(filter::linear, mip_filter::linear, address::repeat);
     
-    if (material.albedoMode == AccessModeValue) {
-        albedo = material.albedoValue;
-        alpha = 1.0;
-    } else {
-        float4 color = albedoTexture.sample(textureSampler, in.texCoords);
-        albedo = LinearFromSRGB(color.xyz);
-        alpha = color.w;
-    }
+    float ambientOcclusion = is_null_texture(ambientOcclusionTexture) ? 1.0f : mix(1.0f, ambientOcclusionTexture.sample(repeatSampler, in.texCoords).r, materialProperties.occlusionWeight);
+    float4 baseColor = is_null_texture(baseColorTexture) ? materialProperties.baseColor : baseColorTexture.sample(repeatSampler, in.texCoords) * materialProperties.baseColor;
+    float authoredRoughness = is_null_texture(roughnessTexture) ? materialProperties.roughnessFactor : roughnessTexture.sample(repeatSampler, in.texCoords).g * materialProperties.roughnessFactor;
+    float metalness = is_null_texture(metallicTexture) ? materialProperties.metallicFactor : metallicTexture.sample(repeatSampler, in.texCoords).b * materialProperties.metallicFactor;
     
-    float metallic;
+    Material material;
+    material.baseColor = baseColor;
+    material.roughness = remap(0.0f, 1.0f, 0.045f, 1.0f, authoredRoughness);
+    material.metalness = metalness;
+    material.ambientOcclusion = ambientOcclusion;
     
-    if (material.metallicMode == AccessModeValue) {
-        metallic = material.metallicValue;
-    } else {
-        metallic = metallicTexture.sample(textureSampler, in.texCoords).x;
-    }
-    
-    float roughness;
-    
-    if (material.roughnessMode == AccessModeValue) {
-        roughness = material.roughnessValue;
-    } else {
-        roughness = roughnessTexture.sample(textureSampler, in.texCoords).x;
-    }
-    
-    float3 ambientOcclusion;
-    
-    if (material.ambientOcclusionMode == AccessModeValue) {
-        ambientOcclusion = material.ambientOcclusionValue;
-    } else {
-        ambientOcclusion = ambientOcclusionTexture.sample(textureSampler, in.texCoords).xyz;
-    }
-    
-    float3 emissive;
-    
-    if (material.emissiveMode == AccessModeValue) {
-        emissive = material.emissiveValue;
-    } else {
-        emissive = emissiveTexture.sample(textureSampler, in.texCoords).xyz;
-    }
+    float3 V = normalize(-in.eyePosition);
+    float3 Ng = normalize(in.eyeNormal);
     
     float3 N;
     
-    if (material.normalMode == AccessModeValue) {
-        N = normalize(in.normal);
+    if (!is_null_texture(normalTexture)) {
+        float3 T = normalize(in.eyeTangent);
+        float3 B = cross(in.eyeNormal, in.eyeTangent) * in.tangentSign;
+        float3x3 TBN = { T, B, Ng };
+        float3 Nt = normalTexture.sample(repeatSampler, in.texCoords).xyz * 2.0f - 1.0f;
+        N = TBN * Nt;
     } else {
-        N = NormalFromMap(normalTexture, in);
+        N = Ng;
     }
     
-    float3 V = normalize(float3(0) - in.viewPosition);
+    Surface surface;
+    surface.emitted = is_null_texture(emissiveTexture) ? materialProperties.emissiveColor.rgb : emissiveTexture.sample(repeatSampler, in.texCoords).rgb;
     
-    float3 f0 = float3(0.04);
-    f0 = mix(f0, albedo, metallic);
-    
-    float3 l0 = float3(0.0);
-    
-    for (uint i = 0; i < frame.lightCount; ++i) {
-        constant Light &light = lights[i];
+    for (uint lightIndex = 0; lightIndex < frame.lightCount; lightIndex += 1) {
+        Light light = lights[lightIndex];
         
-        float3 L;
-        float attenuation;
+        float3 lightToPoint = light.directionToPoint(in.eyePosition);
+        float3 intensity = light.evaluateIntensity(lightToPoint);
         
-        switch (light.type) {
-            case LightTypeDirectional:
-                L = normalize(-light.direction);
-                attenuation = 1.0;
-                
-                break;
-            case LightTypeOmnidirectional:
-                float3 toLight = (light.position - in.worldPosition);
-                
-                L = normalize(toLight);
-                attenuation = DistanceAttenuation(light, toLight);
-                
-                break;
-        }
-        
+        float3 L = normalize(-lightToPoint);
         float3 H = normalize(L + V);
-        float3 radiance = light.intensity * attenuation;
         
-        float NDF = DistributionGGX(N, H, roughness);
-        float G = GeometrySmith(N, V, L, roughness);
-        float3 F = FresnelSchlick(clamp(dot(H, V), 0.0, 1.0), f0);
+        float NdotL = dot(N, L);
+        float NdotV = dot(N, V);
+        float NdotH = dot(N, H);
+        float VdotH = dot(V, H);
         
-        float3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-        float3 specular = numerator / denominator;
+        float diffuse = saturate(NdotL);
+        float3 specular = BRDF(material, NdotL, NdotV, NdotH, VdotH);
         
-        float3 kS = F;
-        float3 kD = float3(1.0) - kS;
-        
-        kD *= 1.0 - metallic;
-        
-        float NdotL = max(dot(N, L), 0.0);
-        
-        l0 += (kD * albedo / M_PI_F + specular) * radiance * NdotL;
+        surface.reflected += intensity * diffuse * specular;
     }
     
-    float3 ambient = float3(0.03) * albedo * ambientOcclusion;
-    
-    float3 color = ambient + l0 + emissive;
-    color = color / (color + float3(1.0));
-    color = pow(color, float3(1.0 / 2.4));
+    float3 color = surface.emitted + surface.reflected;
+    float alpha = material.baseColor.a * materialProperties.opacity;
     
     return float4(color * alpha, alpha);
 }

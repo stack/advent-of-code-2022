@@ -18,47 +18,73 @@ fileprivate let MaxOutstandingFrameCount = 3
 fileprivate let MaxConstantsSize = 1024 * 1024 * 3
 fileprivate let MinBufferAlignment = 256
 
+public let DefaultBaseColor = SIMD4<Float>(1, 1, 1, 1)
+public let DefaultMetallicFactor: Float = 0
+public let DefaultRoughnessFactor: Float = 0.5
+public let DefaultEmissiveColor = SIMD4<Float>(0, 0, 0, 1)
+public let DefaultOpacityValue: Float = 1.0
+
+fileprivate struct VertexBufferIndex {
+    static let vertexAttributes = 0
+    static let nodeConstants = 8
+    static let frameConstants = 9
+    static let lightConstants = 10
+}
+
+fileprivate struct FragmentBufferIndex {
+    static let frameConstants = 0
+    static let lightConstants = 1
+    static let materialConstants = 2
+}
+
+fileprivate struct FragmentTextureIndex {
+    static let baseColor = 0
+    static let emissive = 1
+    static let normal = 2
+    static let metalness = 3
+    static let roughness = 4
+    static let ambientOcclusion = 5
+}
+
 // MARK: - Scene Objects
 
 fileprivate struct Material {
-    var albedoValue: SIMD3<Float> = .zero
-    var albedoTexture: MTLTexture?
+    var baseColor: SIMD4<Float> = DefaultBaseColor
+    var baseColorTexture: MTLTexture? = nil
     
-    var metallicValue: Float = .zero
-    var metallicTexture: MTLTexture?
+    var metallicFactor: Float = DefaultMetallicFactor
+    var metallicTexture: MTLTexture? = nil
     
-    var roughnessValue: Float = .zero
-    var roughnessTexture: MTLTexture?
+    var roughnessFactor: Float = DefaultRoughnessFactor
+    var roughnessTexture: MTLTexture? = nil
     
-    var normalValue: SIMD3<Float> = .zero
-    var normalTexture: MTLTexture?
+    var normalTexture: MTLTexture? = nil
+    var ambientOcclusionTexture: MTLTexture? = nil
     
-    var emissiveValue: SIMD3<Float> = .zero
-    var emissiveTexture: MTLTexture?
+    var emissiveColor: SIMD4<Float> = DefaultEmissiveColor
+    var emissiveTexture: MTLTexture? = nil
     
-    var ambientOcclusionValue: Float = .zero
-    var ambientOcclusionTexture: MTLTexture?
+    var opacity: Float = DefaultOpacityValue
     
     init() { }
     
-    init(material sourceMaterial: MDLMaterial?, textureLoader: MTKTextureLoader) {
-        albedoValue = float3(for: .baseColor, in: sourceMaterial)
-        albedoTexture = texture(for: .baseColor, in: sourceMaterial, textureLoader: textureLoader)
+    init(material sourceMaterial: MDLMaterial, device: MTLDevice) {
+        baseColor = float4(for: .baseColor, in: sourceMaterial, defaultValue: DefaultBaseColor)
+        baseColorTexture = texture(for: .baseColor, in: sourceMaterial, device: device)
         
-        metallicValue = float(for: .metallic, in: sourceMaterial)
-        metallicTexture = texture(for: .metallic, in: sourceMaterial, textureLoader: textureLoader)
+        metallicFactor = float(for: .metallic, in: sourceMaterial, defaultValue: DefaultMetallicFactor)
+        metallicTexture = texture(for: .metallic, in: sourceMaterial, device: device)
         
-        roughnessValue = float(for: .roughness, in: sourceMaterial)
-        roughnessTexture = texture(for: .roughness, in: sourceMaterial, textureLoader: textureLoader)
+        roughnessFactor = float(for: .roughness, in: sourceMaterial, defaultValue: DefaultRoughnessFactor)
+        roughnessTexture = texture(for: .roughness, in: sourceMaterial, device: device)
         
-        normalValue = float3(for: .tangentSpaceNormal, in: sourceMaterial)
-        normalTexture = texture(for: .tangentSpaceNormal, in: sourceMaterial, textureLoader: textureLoader)
+        normalTexture = texture(for: .tangentSpaceNormal, in: sourceMaterial, device: device)
+        ambientOcclusionTexture = texture(for: .ambientOcclusion, in: sourceMaterial, device: device)
         
-        emissiveValue = .zero
-        emissiveTexture = texture(for: .emission, in: sourceMaterial, textureLoader: textureLoader)
+        emissiveColor = float4(for: .emission, in: sourceMaterial, defaultValue: DefaultEmissiveColor)
+        emissiveTexture = texture(for: .emission, in: sourceMaterial, device: device)
         
-        ambientOcclusionValue = float(for: .ambientOcclusion, in: sourceMaterial)
-        ambientOcclusionTexture = texture(for: .ambientOcclusion, in: sourceMaterial, textureLoader: textureLoader)
+        opacity = float(for: .opacity, in: sourceMaterial, defaultValue: DefaultOpacityValue)
         
         /*
         let allSemantics: [MDLMaterialSemantic] = [
@@ -92,47 +118,58 @@ fileprivate struct Material {
          */
     }
     
-    private func float(for semantic: MDLMaterialSemantic, in material: MDLMaterial?) -> Float {
-        guard let materialProperty = material?.property(with: semantic) else { return .zero }
-        guard materialProperty.type == .float else { return .zero }
+    private func float(for semantic: MDLMaterialSemantic, in material: MDLMaterial, defaultValue: Float) -> Float {
+        guard let property = material.property(with: semantic) else { return defaultValue }
+        guard property.type == .float else { return defaultValue }
         
-        return materialProperty.floatValue
+        return property.floatValue
     }
     
-    private func float3(for semantic: MDLMaterialSemantic, in material: MDLMaterial?) -> SIMD3<Float> {
-        guard let materialProperty = material?.property(with: semantic) else { return .zero }
+    private func float4(for semantic: MDLMaterialSemantic, in material: MDLMaterial, defaultValue: SIMD4<Float>) -> SIMD4<Float> {
+        guard let property = material.property(with: semantic) else { return defaultValue }
         
-        if materialProperty.type == .float {
-            return SIMD3<Float>(repeating: materialProperty.floatValue)
-        } else if materialProperty.type == .float3 {
-            return materialProperty.float3Value
-        } else {
-            return .zero
+        switch property.type {
+        case .float3:
+            return SIMD4<Float>(property.float3Value, 1)
+        case .float4:
+            return property.float4Value
+        case .color:
+            let color = property.color ?? CGColor.white
+            let colorSpace = CGColorSpace(name: CGColorSpace.linearSRGB)!
+            
+            if let matchedColor = color.converted(to: colorSpace, intent: .defaultIntent, options: nil), let components = matchedColor.components {
+                return SIMD4<Float>(components.map { Float($0) })
+            } else {
+                return SIMD4<Float>(repeating: 1.0)
+            }
+        default:
+            return defaultValue
         }
     }
     
-    private func texture(for semantic: MDLMaterialSemantic, in material: MDLMaterial?, textureLoader: MTKTextureLoader) -> MTLTexture? {
-        guard let materialProperty = material?.property(with: semantic) else { return nil }
-        guard let sourceTexture = materialProperty.textureSamplerValue?.texture else { return nil }
+    private func texture(for semantic: MDLMaterialSemantic, in material: MDLMaterial, device: MTLDevice) -> MTLTexture? {
+        guard let property = material.property(with: semantic) else { return nil }
+        guard property.type == .texture else { return nil }
+        guard let mdlTexture = property.textureSamplerValue?.texture else { return nil }
         
-        let wantsMips: Bool
-        
-        if materialProperty.semantic == .tangentSpaceNormal {
-            wantsMips = false
-        } else if materialProperty.textureSamplerValue?.texture?.mipLevelCount == 1 {
-            wantsMips = false
-        } else {
-            wantsMips = true
-        }
-
-        let options: [MTKTextureLoader.Option:Any] = [
-            .generateMipmaps : wantsMips,
+        let textureLoaderOptions: [MTKTextureLoader.Option:Any] = [
+            .generateMipmaps : true,
             .textureUsage : MTLTextureUsage.shaderRead.rawValue,
             .textureStorageMode : MTLStorageMode.private.rawValue,
-            .origin : MTKTextureLoader.Origin.bottomLeft.rawValue
+            .origin : MTKTextureLoader.Origin.flippedVertically.rawValue
         ]
         
-        let texture = try? textureLoader.newTexture(texture: sourceTexture, options: options)
+        let textureLoader = MTKTextureLoader(device: device)
+        
+        var texture: MTLTexture?
+        
+        do {
+            texture = try textureLoader.newTexture(texture: mdlTexture, options: textureLoaderOptions)
+        } catch {
+            texture = nil
+        }
+            
+        
         return texture
     }
 }
@@ -234,64 +271,34 @@ fileprivate class Light {
     var direction: SIMD3<Float> {
         return -worldTransform.columns.2.xyz
     }
-
-    var projectionMatrix: simd_float4x4 {
-        let width: Float = 1.5
-        let depth: Float = 10.0
-        
-        return simd_float4x4(
-            orthographicProjectionWithLeft: -width,
-            top: width,
-            right: width,
-            bottom: -width,
-            near: 0,
-            far: depth
-        )
-    }
 }
 
 // MARK: - Renderer Uniforms
 
 fileprivate struct NodeConstants {
     var modelMatrix: float4x4
+    var normalMatrix: float3x3
 }
 
 fileprivate struct MaterialConstants {
-    var albedoMode: UInt8
-    var albedoValue: SIMD3<Float>
-    
-    var metallicMode: UInt8
-    var metallicValue: Float
-    
-    var roughnessMode: UInt8
-    var roughnessValue: Float
-    
-    var normalMode: UInt8
-    var normalValue: SIMD3<Float>
-    
-    var emissiveMode: UInt8
-    var emissiveValue: SIMD3<Float>
-    
-    var ambientOcclusionMode: UInt8
-    var ambientOcclusionValue: Float
+    var baseColor: SIMD4<Float>
+    var emissiveColor: SIMD4<Float>
+    var metallicFactor: Float
+    var roughnessFactor: Float
+    var occlusionWeight: Float
+    var opacity: Float
 }
 
 fileprivate struct FrameConstants {
-    var projectionMatrix: float4x4
     var viewMatrix: float4x4
+    var viewProjectionMatrix: float4x4
     var lightCount: UInt32
 }
 
 fileprivate struct LightConstants {
-    var viewProjectionMatrix: simd_float4x4
-    var intensity: simd_float3
-    var position: simd_float3
-    var direction: simd_float3
-    var type: UInt32
-}
-
-fileprivate struct ShadowConstants {
-    var modelViewProjectionMatrix: simd_float4x4
+    var position: SIMD4<Float>
+    var direction: SIMD4<Float>
+    var intensity: SIMD4<Float>
 }
 
 open class Solution3DContext: SolutionContext {
@@ -305,9 +312,6 @@ open class Solution3DContext: SolutionContext {
     private var textureLoader: MTKTextureLoader!
     private var textureOptions: [MTKTextureLoader.Option:Any]!
     private var textureCache: CVMetalTextureCache!
-    
-    private var defaultTexture: MTLTexture!
-    private var defaultNormalTexture: MTLTexture!
     
     private var meshes: [String:Mesh] = [:]
     private var nodesTable: [String:Node] = [:]
@@ -323,7 +327,6 @@ open class Solution3DContext: SolutionContext {
     private var constantBuffer: MTLBuffer!
     private var pipelineState: MTLRenderPipelineState!
     private var depthStencilState: MTLDepthStencilState!
-    private var samplerState: MTLSamplerState!
     
     private let sampleCount = 4
     private var msaaTextures: [MTLTexture]!
@@ -357,14 +360,14 @@ open class Solution3DContext: SolutionContext {
         mdlVertexDescriptor.vertexAttributes[1].offset = MemoryLayout<Float>.size * 3
         mdlVertexDescriptor.vertexAttributes[1].bufferIndex = 0
         mdlVertexDescriptor.vertexAttributes[2].name = MDLVertexAttributeTangent
-        mdlVertexDescriptor.vertexAttributes[2].format = .float3
+        mdlVertexDescriptor.vertexAttributes[2].format = .float4
         mdlVertexDescriptor.vertexAttributes[2].offset = MemoryLayout<Float>.size * 6
         mdlVertexDescriptor.vertexAttributes[2].bufferIndex = 0
         mdlVertexDescriptor.vertexAttributes[3].name = MDLVertexAttributeTextureCoordinate
         mdlVertexDescriptor.vertexAttributes[3].format = .float2
-        mdlVertexDescriptor.vertexAttributes[3].offset = MemoryLayout<Float>.size * 9
+        mdlVertexDescriptor.vertexAttributes[3].offset = MemoryLayout<Float>.size * 10
         mdlVertexDescriptor.vertexAttributes[3].bufferIndex = 0
-        mdlVertexDescriptor.bufferLayouts[0].stride = MemoryLayout<Float>.size * 11
+        mdlVertexDescriptor.bufferLayouts[0].stride = MemoryLayout<Float>.size * 12
         
         vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(mdlVertexDescriptor)!
         
@@ -380,21 +383,6 @@ open class Solution3DContext: SolutionContext {
         CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &textureCache)
         
         self.textureCache = textureCache!
-        
-        let defaultRegion = MTLRegionMake2D(0, 0, 1, 1)
-        
-        let defaultTextureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: 1, height: 1, mipmapped: false)
-        defaultTextureDescriptor.usage = .shaderRead
-        
-        defaultTexture = device.makeTexture(descriptor: defaultTextureDescriptor)!
-        
-        let defaultColor: [UInt8] = [ 0, 0, 0, 255 ]
-        defaultTexture.replace(region: defaultRegion, mipmapLevel: 0, withBytes: defaultColor, bytesPerRow: 4)
-        
-        defaultNormalTexture = device.makeTexture(descriptor: defaultTextureDescriptor)!
-        
-        let defaultNormalColor: [UInt8] = [ 127, 127, 255, 255 ]
-        defaultNormalTexture.replace(region: defaultRegion, mipmapLevel: 0, withBytes: defaultNormalColor, bytesPerRow: 4)
         
         commandQueue = device.makeCommandQueue()!
         commandQueue.label = "Solution 3D Command Queue"
@@ -436,8 +424,6 @@ open class Solution3DContext: SolutionContext {
         samplerDescriptor.mipFilter = .linear
         samplerDescriptor.sAddressMode = .repeat
         samplerDescriptor.tAddressMode = .repeat
-        
-        samplerState = device.makeSamplerState(descriptor: samplerDescriptor)!
         
         let msaaTextureDescriptor = MTLTextureDescriptor()
         msaaTextureDescriptor.textureType = .type2DMultisample
@@ -493,11 +479,16 @@ open class Solution3DContext: SolutionContext {
         mdlAsset.loadTextures()
         
         for sourceMesh in mdlAsset.childObjects(of: MDLMesh.self) as! [MDLMesh] {
-            sourceMesh.addOrthTanBasis(
-                forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
-                normalAttributeNamed: MDLVertexAttributeNormal,
-                tangentAttributeNamed: MDLVertexAttributeTangent
-            )
+            let hasTextureCoordinates = sourceMesh.vertexAttributeData(forAttributeNamed: MDLVertexAttributeTextureCoordinate) != nil
+            let hasNormals = sourceMesh.vertexAttributeData(forAttributeNamed: MDLVertexAttributeNormal) != nil
+            
+            if hasTextureCoordinates && hasNormals {
+                sourceMesh.addOrthTanBasis(
+                    forTextureCoordinateAttributeNamed: MDLVertexAttributeTextureCoordinate,
+                    normalAttributeNamed: MDLVertexAttributeNormal,
+                    tangentAttributeNamed: MDLVertexAttributeTangent
+                )
+            }
             
             sourceMesh.vertexDescriptor = mdlVertexDescriptor
         }
@@ -508,8 +499,10 @@ open class Solution3DContext: SolutionContext {
             var materials: [Material] = []
             
             for sourceSubmesh in sourceMesh.submeshes as! [MDLSubmesh] {
-                let material = Material(material: sourceSubmesh.material, textureLoader: textureLoader)
-                materials.append(material)
+                if let mdlMaterial = sourceSubmesh.material {
+                    let material = Material(material: mdlMaterial, device: renderer.metalDevice)
+                    materials.append(material)
+                }
             }
             
             finalMeshes.append(mesh)
@@ -520,7 +513,7 @@ open class Solution3DContext: SolutionContext {
         self.meshes[name] = finalMesh
     }
     
-    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, albedo: SIMD3<Float> = .one, metallic: Float = 0, roughness: Float = 1, normal: SIMD3<Float> = .one, emissive: SIMD3<Float> = .zero, ambientOcclusion: Float = .zero) throws {
+    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
         let mdlMesh = MDLMesh(boxWithExtent: extents, segments: SIMD3<UInt32>(1, 1, 1), inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -534,19 +527,18 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        material.albedoValue = albedo
-        material.metallicValue = metallic
-        material.roughnessValue = roughness
-        material.normalValue = normal
-        material.emissiveValue = emissive
-        material.ambientOcclusionValue = ambientOcclusion
+        material.baseColor = baseColor
+        material.metallicFactor = metallic
+        material.roughnessFactor = roughness
+        material.emissiveColor = emissive
+        material.opacity = opacity
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
         meshes[name] = mesh
     }
     
-    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, albedo: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
+    public func loadBoxMesh(name: String, extents: SIMD3<Float> = .one, inwardNormals: Bool = false, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
         let mdlMesh = MDLMesh(boxWithExtent: extents, segments: SIMD3<UInt32>(1, 1, 1), inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -560,7 +552,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        if let albedo { material.albedoTexture = textures[albedo] }
+        if let baseColor { material.baseColorTexture = textures[baseColor] }
         if let metallic { material.metallicTexture = textures[metallic] }
         if let roughness { material.roughnessTexture = textures[roughness] }
         if let normal { material.normalTexture = textures[normal] }
@@ -572,7 +564,7 @@ open class Solution3DContext: SolutionContext {
         meshes[name] = mesh
     }
     
-    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, albedo: SIMD3<Float> = .one, metallic: Float = 0, roughness: Float = 1, normal: SIMD3<Float> = .one, emissive: SIMD3<Float> = .zero, ambientOcclusion: Float = .zero) throws {
+    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
         let mdlMesh = MDLMesh(planeWithExtent: extents, segments: SIMD2<UInt32>(1, 1), geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -586,19 +578,18 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        material.albedoValue = albedo
-        material.metallicValue = metallic
-        material.roughnessValue = roughness
-        material.normalValue = normal
-        material.emissiveValue = emissive
-        material.ambientOcclusionValue = ambientOcclusion
+        material.baseColor = baseColor
+        material.metallicFactor = metallic
+        material.roughnessFactor = roughness
+        material.emissiveColor = emissive
+        material.opacity = opacity
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
         meshes[name] = mesh
     }
     
-    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, albedo: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
+    public func loadPlaneMesh(name: String, extents: SIMD3<Float> = .one, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
         let mdlMesh = MDLMesh(planeWithExtent: extents, segments: SIMD2<UInt32>(1, 1), geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -612,7 +603,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        if let albedo { material.albedoTexture = textures[albedo] }
+        if let baseColor { material.baseColorTexture = textures[baseColor] }
         if let metallic { material.metallicTexture = textures[metallic] }
         if let roughness { material.roughnessTexture = textures[roughness] }
         if let normal { material.normalTexture = textures[normal] }
@@ -624,7 +615,7 @@ open class Solution3DContext: SolutionContext {
         meshes[name] = mesh
     }
     
-    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, albedo: SIMD3<Float> = .one, metallic: Float = 0, roughness: Float = 1, normal: SIMD3<Float> = .one, emissive: SIMD3<Float> = .zero, ambientOcclusion: Float = .zero) throws {
+    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, baseColor: SIMD4<Float> = DefaultBaseColor, metallic: Float = DefaultMetallicFactor, roughness: Float = DefaultRoughnessFactor, emissive: SIMD4<Float> = DefaultEmissiveColor, opacity: Float = DefaultOpacityValue) throws {
         let mdlMesh = MDLMesh(sphereWithExtent: extents, segments: segments, inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -638,19 +629,18 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        material.albedoValue = albedo
-        material.metallicValue = metallic
-        material.roughnessValue = roughness
-        material.normalValue = normal
-        material.emissiveValue = emissive
-        material.ambientOcclusionValue = ambientOcclusion
+        material.baseColor = baseColor
+        material.metallicFactor = metallic
+        material.roughnessFactor = roughness
+        material.emissiveColor = emissive
+        material.opacity = opacity
         
         let mesh = Mesh(name: name, meshes: [mtkMesh], materials: [[material]])
         
         meshes[name] = mesh
     }
     
-    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, albedo: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
+    public func loadSphereMesh(name: String, extents: SIMD3<Float> = SIMD3<Float>(0.5, 0.5, 0.5), segments: SIMD2<UInt32> = SIMD2<UInt32>(24, 24), inwardNormals: Bool = false, baseColor: String? = nil, metallic: String? = nil, roughness: String? = nil, normal: String? = nil, emissive: String? = nil, ambientOcclusion: String? = nil) throws {
         let mdlMesh = MDLMesh(sphereWithExtent: extents, segments: segments, inwardNormals: inwardNormals, geometryType: .triangles, allocator: meshBufferAllocator)
         
         mdlMesh.addOrthTanBasis(
@@ -664,7 +654,7 @@ open class Solution3DContext: SolutionContext {
         let mtkMesh = try MTKMesh(mesh: mdlMesh, device: renderer.metalDevice)
         
         var material = Material()
-        if let albedo { material.albedoTexture = textures[albedo] }
+        if let baseColor { material.baseColorTexture = textures[baseColor] }
         if let metallic { material.metallicTexture = textures[metallic] }
         if let roughness { material.roughnessTexture = textures[roughness] }
         if let normal { material.normalTexture = textures[normal] }
@@ -731,19 +721,18 @@ open class Solution3DContext: SolutionContext {
         nodes.removeAll(where: { $0 === node })
     }
     
-    public func updateNode(name: String, instance: Int = 0, transform: simd_float4x4? = nil, materialIndex: Int = 0, albedo: SIMD3<Float>? = nil, metallic: Float? = nil, roughness: Float? = nil, normal: SIMD3<Float>? = nil, emissive: SIMD3<Float>? = nil, ambientOcclusion: Float? = nil) {
+    public func updateNode(name: String, instance: Int = 0, transform: simd_float4x4? = nil, materialIndex: Int = 0, baseColor: SIMD4<Float>? = nil, metallic: Float? = nil, roughness: Float? = nil, emissive: SIMD4<Float>? = nil, ambientOcclusion: Float? = nil, opacity: Float? = nil) {
         guard let node = nodesTable[name] else {
             return
         }
         
         if let transform { node.transforms[instance] = transform }
         
-        if let albedo { node.materials[materialIndex].albedoValue = albedo }
-        if let metallic { node.materials[materialIndex].metallicValue = metallic }
-        if let roughness { node.materials[materialIndex].roughnessValue = roughness }
-        if let normal { node.materials[materialIndex].normalValue = normal }
-        if let emissive { node.materials[materialIndex].emissiveValue = emissive }
-        if let ambientOcclusion { node.materials[materialIndex].ambientOcclusionValue = ambientOcclusion }
+        if let baseColor { node.materials[materialIndex].baseColor = baseColor }
+        if let metallic { node.materials[materialIndex].metallicFactor = metallic }
+        if let roughness { node.materials[materialIndex].roughnessFactor = roughness }
+        if let emissive { node.materials[materialIndex].emissiveColor = emissive }
+        if let opacity { node.materials[materialIndex].opacity = opacity }
     }
     
     // MARK: - Light & Camera Management
@@ -819,13 +808,13 @@ open class Solution3DContext: SolutionContext {
         encoder.setFrontFacing(.counterClockwise)
         encoder.setCullMode(.back)
         
-        encoder.setVertexBuffer(constantBuffer, offset: 0, index: 2)
-        encoder.setVertexBuffer(constantBuffer, offset: frameConstantsOffset, index: 3)
-        encoder.setFragmentBuffer(constantBuffer, offset: 0, index: 2)
-        encoder.setFragmentBuffer(constantBuffer, offset: frameConstantsOffset, index: 3)
-        encoder.setFragmentBuffer(constantBuffer, offset: lightConstantsOffset, index: 4)
-        encoder.setFragmentBuffer(constantBuffer, offset: 0, index: 5)
-        encoder.setFragmentSamplerState(samplerState, index: 0)
+        encoder.setVertexBuffer(constantBuffer, offset: 0, index: VertexBufferIndex.nodeConstants)
+        encoder.setVertexBuffer(constantBuffer, offset: frameConstantsOffset, index: VertexBufferIndex.frameConstants)
+        encoder.setVertexBuffer(constantBuffer, offset: lightConstantsOffset, index: VertexBufferIndex.lightConstants)
+        
+        encoder.setFragmentBuffer(constantBuffer, offset: 0, index: FragmentBufferIndex.materialConstants)
+        encoder.setFragmentBuffer(constantBuffer, offset: frameConstantsOffset, index: FragmentBufferIndex.frameConstants)
+        encoder.setFragmentBuffer(constantBuffer, offset: lightConstantsOffset, index: FragmentBufferIndex.lightConstants)
         
         let nodeLayout = MemoryLayout<NodeConstants>.self
         let materialLayout = MemoryLayout<MaterialConstants>.self
@@ -835,7 +824,7 @@ open class Solution3DContext: SolutionContext {
             
             encoder.pushDebugGroup("Node \(node.name)")
             
-            encoder.setVertexBufferOffset(nodeConstantsOffset[objectIndex], index: 2)
+            encoder.setVertexBufferOffset(nodeConstantsOffset[objectIndex], index: VertexBufferIndex.nodeConstants)
         
             for (meshIndex, meshBuffer) in node.mesh.vertexBuffers.enumerated() {
                 encoder.setVertexBuffer(meshBuffer.buffer, offset: meshBuffer.offset, index: meshIndex)
@@ -844,14 +833,14 @@ open class Solution3DContext: SolutionContext {
             for (submeshIndex, submesh) in node.mesh.submeshes.enumerated() {
                 let material = node.materials[submeshIndex]
                 
-                encoder.setFragmentTexture(material.albedoTexture ?? defaultTexture, index: 0)
-                encoder.setFragmentTexture(material.metallicTexture ?? defaultTexture, index: 1)
-                encoder.setFragmentTexture(material.roughnessTexture ?? defaultTexture, index: 2)
-                encoder.setFragmentTexture(material.normalTexture ?? defaultNormalTexture, index: 3)
-                encoder.setFragmentTexture(material.emissiveTexture ?? defaultTexture, index: 4)
-                encoder.setFragmentTexture(material.ambientOcclusionTexture ?? defaultTexture, index: 5)
+                encoder.setFragmentTexture(material.baseColorTexture, index: FragmentTextureIndex.baseColor)
+                encoder.setFragmentTexture(material.emissiveTexture, index: FragmentTextureIndex.emissive)
+                encoder.setFragmentTexture(material.normalTexture, index: FragmentTextureIndex.normal)
+                encoder.setFragmentTexture(material.metallicTexture, index: FragmentTextureIndex.metalness)
+                encoder.setFragmentTexture(material.roughnessTexture, index: FragmentTextureIndex.roughness)
+                encoder.setFragmentTexture(material.ambientOcclusionTexture, index: FragmentTextureIndex.ambientOcclusion)
                                            
-                encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex] + (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * submeshIndex), index: 5)
+                encoder.setFragmentBufferOffset(nodeConstantsOffset[objectIndex] + (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * submeshIndex), index: FragmentBufferIndex.materialConstants)
                 let indexBuffer = submesh.indexBuffer
                 
                 encoder.drawIndexedPrimitives(
@@ -871,17 +860,23 @@ open class Solution3DContext: SolutionContext {
     }
     
     private func updateFrameConstants() {
-        let viewMatrix = pointOfView.inverse
-        
         let aspectRatio = Float(width) / Float(height)
         let projectionMatrix = simd_float4x4(
             perspectiveProjectionFoVY: .pi / 3,
             aspectRatio: aspectRatio,
             near: 0.01,
-            far: 100
+            far: 1000
         )
         
-        var constants = FrameConstants(projectionMatrix: projectionMatrix, viewMatrix: viewMatrix, lightCount: UInt32(lightsTable.count))
+        let cameraMatrix = pointOfView
+        let viewMatrix = cameraMatrix.inverse
+        let viewProjectionMatrix = projectionMatrix * viewMatrix
+        
+        var constants = FrameConstants(
+            viewMatrix: viewMatrix,
+            viewProjectionMatrix: viewProjectionMatrix,
+            lightCount: UInt32(lightsTable.count)
+        )
         
         let constantsLayout = MemoryLayout<FrameConstants>.self
         frameConstantsOffset = allocateConstantStorage(size: constantsLayout.size, alignment: constantsLayout.stride)
@@ -891,21 +886,23 @@ open class Solution3DContext: SolutionContext {
     }
     
     private func updateLightConstants() {
+        let cameraMatrix = pointOfView
+        let viewMatrix = cameraMatrix.inverse
+        
         let lightLayout = MemoryLayout<LightConstants>.self
         lightConstantsOffset = allocateConstantStorage(size: lightLayout.stride * lightsTable.count, alignment: lightLayout.stride)
         let lightsBufferPointer = constantBuffer.contents().advanced(by: lightConstantsOffset).assumingMemoryBound(to: LightConstants.self)
         
         for (lightIndex, light) in lights.enumerated() {
-            let shadowViewMatrix = light.worldTransform.inverse
-            let shadowProjectionMatrix = light.projectionMatrix
-            let shadowViewProjectionMatrix = shadowProjectionMatrix * shadowViewMatrix
+            let lightModelViewMatrix = viewMatrix * light.worldTransform
+            let lightPosition = lightModelViewMatrix.columns.3.xyz
+            let lightDirection = lightModelViewMatrix.columns.2.xyz
+            let directionW: Float = light.type == .directional ? 0.0 : 1.0
             
             lightsBufferPointer[lightIndex] = LightConstants(
-                viewProjectionMatrix: shadowViewProjectionMatrix,
-                intensity: light.color * light.intensity,
-                position: light.position,
-                direction: light.direction,
-                type: light.type.rawValue
+                position: SIMD4<Float>(lightPosition, 1.0),
+                direction: SIMD4<Float>(lightDirection, directionW),
+                intensity: SIMD4<Float>(light.color * light.intensity, 1.0)
             )
         }
     }
@@ -919,29 +916,29 @@ open class Solution3DContext: SolutionContext {
         for node in nodes {
             guard node.isDrawable else { continue }
             
-            var constants = node.worldTransforms.map { NodeConstants(modelMatrix: $0) }
+            var nodeConstants = (0 ..< node.worldTransforms.count).map { instanceIndex -> NodeConstants in
+                let modelMatrix = node.worldTransform(at: instanceIndex)
+                let modelViewMatrix = pointOfView.inverse * modelMatrix
+                let normalMatrix = modelViewMatrix.upperLeft3x3.transpose.inverse
+                
+                return NodeConstants(modelMatrix: modelMatrix, normalMatrix: normalMatrix)
+            }
             
             let totalSize = (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * node.materials.count)
             let totalStride = totalSize
             
             let offset = allocateConstantStorage(size: totalSize, alignment: totalStride)
             let constantsPointer = constantBuffer.contents().advanced(by: offset)
-            constantsPointer.copyMemory(from: &constants, byteCount: nodeLayout.stride * node.transforms.count)
+            constantsPointer.copyMemory(from: &nodeConstants, byteCount: nodeLayout.stride * node.transforms.count)
             
             for (materialIndex, material) in node.materials.enumerated() {
                 var constants = MaterialConstants(
-                    albedoMode: material.albedoTexture == nil ? 0 : 1,
-                    albedoValue: material.albedoValue,
-                    metallicMode: material.metallicTexture == nil ? 0 : 1,
-                    metallicValue: material.metallicValue,
-                    roughnessMode: material.roughnessTexture == nil ? 0 : 1,
-                    roughnessValue: material.roughnessValue,
-                    normalMode: material.normalTexture == nil ? 0 : 1,
-                    normalValue: material.normalValue,
-                    emissiveMode: material.emissiveTexture == nil ? 0 : 1,
-                    emissiveValue: material.emissiveValue,
-                    ambientOcclusionMode: material.ambientOcclusionTexture == nil ? 0 : 1,
-                    ambientOcclusionValue: material.ambientOcclusionValue
+                    baseColor: material.baseColor,
+                    emissiveColor: material.emissiveColor,
+                    metallicFactor: material.metallicFactor,
+                    roughnessFactor: material.roughnessFactor,
+                    occlusionWeight: 1.0,
+                    opacity: material.opacity
                 )
                 
                 let constantsPointer = constantBuffer.contents().advanced(by: offset + (nodeLayout.stride * node.transforms.count) + (materialLayout.stride * materialIndex))
