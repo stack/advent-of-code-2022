@@ -24,59 +24,11 @@ class Visualization3DTestingContext: Solution3DContext {
         // try runStoneBlock()
         // try runVikingRoom()
         // try runShiba()
-        // try runChaos()
+        try runChaos()
         // try runInstances()
-        try runBlueBox()
+        // try runFancyBoxes()
     }
     
-    private func runBlueBox() throws {
-        try loadMesh(name: "BlueTile", fromResource: "BlueTile")
-        try loadMesh(name: "MetalTiles", fromResource: "MetalTiles")
-        try loadMesh(name: "Concrete", fromResource: "Concrete")
-        try loadMesh(name: "RedPlastic", fromResource: "RedPlastic")
-        try loadMesh(name: "RoughMetal", fromResource: "RoughMetal")
-        try loadMesh(name: "Wood", fromResource: "Wood")
-        
-        addNode(name: "Blue Box", mesh: "BlueTile")
-        addNode(name: "MetalTiles", mesh: "MetalTiles")
-        addNode(name: "Concrete", mesh: "Concrete")
-        addNode(name: "RedPlastic", mesh: "RedPlastic")
-        addNode(name: "RoughMetal", mesh: "RoughMetal")
-        addNode(name: "Wood", mesh: "Wood")
-        
-        updateNode(name: "Blue Box", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, 0.6, 0.0)))
-        updateNode(name: "MetalTiles", transform: simd_float4x4(translate: SIMD3<Float>(0.0, 0.6, 0.0)))
-        updateNode(name: "Concrete", transform: simd_float4x4(translate: SIMD3<Float>(1.2, 0.6, 0.0)))
-        updateNode(name: "RedPlastic", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, -0.6, 0.0)))
-        updateNode(name: "RoughMetal", transform: simd_float4x4(translate: SIMD3<Float>(0.0, -0.6, 0.0)))
-        updateNode(name: "Wood", transform: simd_float4x4(translate: SIMD3<Float>(1.2, -0.6, 0.0)))
-        
-        addPointLight(name: "Light 1", intensity: 25)
-        addPointLight(name: "Light 2", intensity: 50)
-        addPointLight(name: "Light 3", intensity: 50)
-        addPointLight(name: "Light 4", intensity: 150)
-        
-        updateLight(name: "Light 1", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
-        updateLight(name: "Light 2", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
-        updateLight(name: "Light 3", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, -6), up: SIMD3<Float>(0, 1, 0)))
-        updateLight(name: "Light 4", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 0, 6), up: SIMD3<Float>(0, 1, 0)))
-        
-        updateCamera(eye: SIMD3<Float>(0.0, 0.2, 3.0), lookAt: normalize(SIMD3<Float>(0.0, 0.0, -1.0)), up: SIMD3<Float>(0, 1, 0))
-        
-        for frameIndex in 0 ..< 2000 {
-            let percentTime = Float(frameIndex) / 2000
-            
-            let xRadians = (percentTime * .pi) + .pi
-            let zRadians = (percentTime * .pi) + .pi
-            
-            let transform = simd_float4x4(translate: SIMD3<Float>(sin(xRadians) * 2, 0, cos(zRadians)) * 2) *
-                simd_float4x4(rotateAbout: SIMD3<Float>(0, 0, 1), byAngle: .pi / 4.0)
-            
-            updateCamera(eye: transform.columns.3.xyz, lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
-            
-            try snapshot()
-        }
-    }
     private func runBoxes() throws {
         try loadBoxMesh(name: "Red Box", baseColor: SIMD4<Float>(1.0, 0.0, 0.0, 1.0))
         
@@ -233,21 +185,93 @@ class Visualization3DTestingContext: Solution3DContext {
         }
     }
     
+    private func runFancyBoxes() throws {
+        try loadMesh(name: "BlueTile", fromResource: "BlueTile")
+        try loadMesh(name: "MetalTiles", fromResource: "MetalTiles")
+        try loadMesh(name: "Concrete", fromResource: "Concrete")
+        try loadMesh(name: "RedPlastic", fromResource: "RedPlastic")
+        try loadMesh(name: "RoughMetal", fromResource: "RoughMetal")
+        try loadMesh(name: "Wood", fromResource: "Wood")
+        
+        addNode(name: "Blue Box", mesh: "BlueTile")
+        addNode(name: "MetalTiles", mesh: "MetalTiles")
+        addNode(name: "Concrete", mesh: "Concrete")
+        addNode(name: "RedPlastic", mesh: "RedPlastic")
+        addNode(name: "RoughMetal", mesh: "RoughMetal")
+        addNode(name: "Wood", mesh: "Wood")
+        
+        updateNode(name: "Blue Box", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, 0.6, 0.0)))
+        updateNode(name: "MetalTiles", transform: simd_float4x4(translate: SIMD3<Float>(0.0, 0.6, 0.0)))
+        updateNode(name: "Concrete", transform: simd_float4x4(translate: SIMD3<Float>(1.2, 0.6, 0.0)))
+        updateNode(name: "RedPlastic", transform: simd_float4x4(translate: SIMD3<Float>(-1.2, -0.6, 0.0)))
+        updateNode(name: "RoughMetal", transform: simd_float4x4(translate: SIMD3<Float>(0.0, -0.6, 0.0)))
+        updateNode(name: "Wood", transform: simd_float4x4(translate: SIMD3<Float>(1.2, -0.6, 0.0)))
+        
+        addPointLight(name: "Light 1", intensity: 25)
+        addPointLight(name: "Light 2", intensity: 50)
+        addPointLight(name: "Light 3", intensity: 50)
+        addPointLight(name: "Light 4", intensity: 150)
+        
+        updateLight(name: "Light 1", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(-6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 2", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(6, 1, 1), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 3", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 1, -6), up: SIMD3<Float>(0, 1, 0)))
+        updateLight(name: "Light 4", transform: simd_float4x4(lookAt: SIMD3<Float>(0, 0, 0), from: SIMD3<Float>(0, 0, 6), up: SIMD3<Float>(0, 1, 0)))
+        
+        updateCamera(eye: SIMD3<Float>(0.0, 0.2, 3.0), lookAt: normalize(SIMD3<Float>(0.0, 0.0, -1.0)), up: SIMD3<Float>(0, 1, 0))
+        
+        for frameIndex in 0 ..< 2000 {
+            let percentTime = Float(frameIndex) / 2000
+            
+            let xRadians = (percentTime * .pi) + .pi
+            let zRadians = (percentTime * .pi) + .pi
+            
+            let transform = simd_float4x4(translate: SIMD3<Float>(sin(xRadians) * 2, 0, cos(zRadians)) * 2) *
+                simd_float4x4(rotateAbout: SIMD3<Float>(0, 0, 1), byAngle: .pi / 4.0)
+            
+            updateCamera(eye: transform.columns.3.xyz, lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+            
+            try snapshot()
+        }
+    }
+    
     private func runInstances() throws {
         let totalBoxes = 20
         let totalArmadillos = 30
-        let totalSlimes = 10
+        let totalFruits = 10
+        let totalShibas = 5
         
         try loadMesh(name: "Stone Block", fromResource: "Stone Block")
         try loadMesh(name: "Armadillo", fromResource: "Armadillo")
         try loadMesh(name: "Fruit", fromResource: "Fruit")
+        try loadMesh(name: "Shiba", fromResource: "Shiba")
         try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
         try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, baseColor: SIMD4<Float>(0, 0, 0, 1), emissiveTexture: "Starscape", roughnessFactor: 1.0)
         
         addNode(name: "Skybox", mesh: "Skybox")
-        addNode(name: "Box", mesh: "Stone Block", instances: totalBoxes)
-        addNode(name: "Armadillo", mesh: "Armadillo", instances: totalArmadillos)
-        addNode(name: "Fruit", mesh: "Fruit", instances: totalSlimes)
+        
+        let boxNames = (0 ..< totalBoxes).map { "Box \($0)" }
+        
+        for name in boxNames {
+            addNode(name: name, mesh: "Stone Block", batch: "Box")
+        }
+        
+        let armadilloNames = (0 ..< totalArmadillos).map { "Armadillo \($0)" }
+        
+        for name in armadilloNames {
+            addNode(name: name, mesh: "Armadillo", batch: "Armadillo")
+        }
+        
+        let fruitNames = (0 ..< totalFruits).map { "Fruit \($0)" }
+        
+        for name in fruitNames {
+            addNode(name: name, mesh: "Fruit", batch: "Fruit")
+        }
+        
+        let shibaNames = (0 ..< totalShibas).map { "Shiba \($0)" }
+        
+        for name in shibaNames {
+            addNode(name: name, mesh: "Shiba", batch: "Shiba")
+        }
         
         updateNode(name: "Skybox", baseColor: SIMD4<Float>(0, 0, 0, 1))
         
@@ -276,7 +300,16 @@ class Visualization3DTestingContext: Solution3DContext {
             )
         }
         
-        var slimePlacements = (0 ..< totalSlimes).map { _ in
+        var fruitPlacements = (0 ..< totalFruits).map { _ in
+            Placement(
+                position: SIMD3<Float>(Float.random(in: -5...5), Float.random(in: -5...5), Float.random(in: -10 ... -2)),
+                rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
+                rotationAngle: 0,
+                angularVelocity: Float.random(in: -0.5...0.5)
+            )
+        }
+        
+        var shibaPlacements = (0 ..< totalShibas).map { _ in
             Placement(
                 position: SIMD3<Float>(Float.random(in: -5...5), Float.random(in: -5...5), Float.random(in: -10 ... -2)),
                 rotationAxis: normalize(SIMD3<Float>(Float.random(in: -1...1), Float.random(in: -1...1), Float.random(in: -1...1))),
@@ -293,7 +326,7 @@ class Visualization3DTestingContext: Solution3DContext {
         for frameIndex in 0 ..< 2000 {
             let timeStep = 1.0 / Float(frameRate)
             
-            for index in 0 ..< boxPlacements.count {
+            for (index, name) in boxNames.enumerated() {
                 boxPlacements[index].rotationAngle += boxPlacements[index].angularVelocity * timeStep * 2
                 
                 let scale = simd_float4x4(scale: SIMD3<Float>(0.005, 0.005, 0.005))
@@ -302,10 +335,10 @@ class Visualization3DTestingContext: Solution3DContext {
                 
                 let transform = translation * rotation * scale
                 
-                updateNode(name: "Box", instance: index, transform: transform)
+                updateNode(name: name, transform: transform)
             }
             
-            for index in 0 ..< armadilloPlacements.count {
+            for (index, name) in armadilloNames.enumerated() {
                 armadilloPlacements[index].rotationAngle += armadilloPlacements[index].angularVelocity * timeStep * 2
                 
                 let scale = simd_float4x4(scale: SIMD3<Float>(0.2, 0.2, 0.2))
@@ -314,19 +347,31 @@ class Visualization3DTestingContext: Solution3DContext {
                 
                 let transform = translation * rotation * scale
                 
-                updateNode(name: "Armadillo", instance: index, transform: transform)
+                updateNode(name: name, transform: transform)
             }
             
-            for index in 0 ..< slimePlacements.count {
-                slimePlacements[index].rotationAngle += slimePlacements[index].angularVelocity * timeStep * 2
+            for (index, name) in fruitNames.enumerated() {
+                fruitPlacements[index].rotationAngle += fruitPlacements[index].angularVelocity * timeStep * 2
                 
                 let scale = simd_float4x4(scale: SIMD3<Float>(0.05, 0.05, 0.05))
-                let rotation = simd_float4x4(rotateAbout: slimePlacements[index].rotationAxis, byAngle: slimePlacements[index].rotationAngle)
-                let translation = simd_float4x4(translate: slimePlacements[index].position)
+                let rotation = simd_float4x4(rotateAbout: fruitPlacements[index].rotationAxis, byAngle: fruitPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: fruitPlacements[index].position)
                 
                 let transform = translation * rotation * scale
                 
-                updateNode(name: "Fruit", instance: index, transform: transform)
+                updateNode(name: name, transform: transform)
+            }
+            
+            for (index, name) in shibaNames.enumerated() {
+                shibaPlacements[index].rotationAngle += shibaPlacements[index].angularVelocity * timeStep * 2
+                
+                let scale = simd_float4x4(scale: SIMD3<Float>(0.75, 0.75, 0.75))
+                let rotation = simd_float4x4(rotateAbout: shibaPlacements[index].rotationAxis, byAngle: shibaPlacements[index].rotationAngle)
+                let translation = simd_float4x4(translate: shibaPlacements[index].position)
+                
+                let transform = translation * rotation * scale
+                
+                updateNode(name: name, transform: transform)
             }
             
             let percentTime = Float(frameIndex) / 2000

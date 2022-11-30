@@ -33,6 +33,7 @@
 		D1EBBB5D292DAECB005459F4 /* Concrete.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB59292DAECA005459F4 /* Concrete.usdz */; };
 		D1EBBB5E292DAECB005459F4 /* MetalTiles.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB5A292DAECB005459F4 /* MetalTiles.usdz */; };
 		D1EBBB60292DAED9005459F4 /* Wood.usdz in Resources */ = {isa = PBXBuildFile; fileRef = D1EBBB5F292DAED9005459F4 /* Wood.usdz */; };
+		D1EBBB622935A5A3005459F4 /* Solution3DObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EBBB612935A5A3005459F4 /* Solution3DObjects.swift */; };
 		DC05ED942914505A004FF9ED /* Utilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC05ED8C2914505A004FF9ED /* Utilities.framework */; };
 		DC05ED992914505A004FF9ED /* UtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05ED982914505A004FF9ED /* UtilitiesTests.swift */; };
 		DC05ED9A2914505A004FF9ED /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = DC05ED8E2914505A004FF9ED /* Utilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -148,6 +149,7 @@
 		D1EBBB59292DAECA005459F4 /* Concrete.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Concrete.usdz; sourceTree = "<group>"; };
 		D1EBBB5A292DAECB005459F4 /* MetalTiles.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = MetalTiles.usdz; sourceTree = "<group>"; };
 		D1EBBB5F292DAED9005459F4 /* Wood.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Wood.usdz; sourceTree = "<group>"; };
+		D1EBBB612935A5A3005459F4 /* Solution3DObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Solution3DObjects.swift; sourceTree = "<group>"; };
 		DC05ED8C2914505A004FF9ED /* Utilities.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utilities.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC05ED8E2914505A004FF9ED /* Utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		DC05ED932914505A004FF9ED /* Utilities Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Utilities Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -317,6 +319,7 @@
 			children = (
 				D1798CB429205A14001C64C0 /* Solution2DContext.swift */,
 				D1798C9229203DF6001C64C0 /* Solution3DContext.swift */,
+				D1EBBB612935A5A3005459F4 /* Solution3DObjects.swift */,
 				DC54E1BC2913F01400C718F3 /* SolutionContext.swift */,
 				D124D8B7291C98D40063FBC4 /* SolutionError.swift */,
 				DC54E1C0291401C300C718F3 /* SolutionRenderer.swift */,
@@ -633,6 +636,7 @@
 				DC05EDC129145268004FF9ED /* SolutionShaders.metal in Sources */,
 				D1798CB529205A14001C64C0 /* Solution2DContext.swift in Sources */,
 				DC05EDC229145268004FF9ED /* SolutionView.swift in Sources */,
+				D1EBBB622935A5A3005459F4 /* Solution3DObjects.swift in Sources */,
 				D1798C9329203DF6001C64C0 /* Solution3DContext.swift in Sources */,
 				DC05EDC029145268004FF9ED /* SolutionRenderer.swift in Sources */,
 				DC05EDBE29145268004FF9ED /* SolutionVideoFile.swift in Sources */,
