@@ -24,8 +24,8 @@ class Visualization3DTestingContext: Solution3DContext {
         // try runStoneBlock()
         // try runVikingRoom()
         // try runShiba()
-        try runChaos()
-        // try runInstances()
+        // try runChaos()
+        try runInstances()
         // try runFancyBoxes()
     }
     
@@ -247,6 +247,11 @@ class Visualization3DTestingContext: Solution3DContext {
         try loadTexture(name: "Starscape", resource: "starscape", withExtension: "png")
         try loadBoxMesh(name: "Skybox", extents: SIMD3<Float>(100, 100, 100), inwardNormals: true, baseColor: SIMD4<Float>(0, 0, 0, 1), emissiveTexture: "Starscape", roughnessFactor: 1.0)
         
+        let stoneBlockUnitScale = unitScale(forMesh: "Stone Block")
+        let armadilloUnitScale = unitScale(forMesh: "Armadillo")
+        let fruitUnitScale = unitScale(forMesh: "Fruit")
+        let shibaUnitScale = unitScale(forMesh: "Shiba")
+        
         addNode(name: "Skybox", mesh: "Skybox")
         
         let boxNames = (0 ..< totalBoxes).map { "Box \($0)" }
@@ -323,13 +328,15 @@ class Visualization3DTestingContext: Solution3DContext {
         
         updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
         
+        let scaleFactor = simd_float4x4(scale: SIMD3<Float>(repeating: 1.0))
+        
         for frameIndex in 0 ..< 2000 {
             let timeStep = 1.0 / Float(frameRate)
             
             for (index, name) in boxNames.enumerated() {
                 boxPlacements[index].rotationAngle += boxPlacements[index].angularVelocity * timeStep * 2
                 
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.005, 0.005, 0.005))
+                let scale = stoneBlockUnitScale * scaleFactor
                 let rotation = simd_float4x4(rotateAbout: boxPlacements[index].rotationAxis, byAngle: boxPlacements[index].rotationAngle)
                 let translation = simd_float4x4(translate: boxPlacements[index].position)
                 
@@ -341,7 +348,7 @@ class Visualization3DTestingContext: Solution3DContext {
             for (index, name) in armadilloNames.enumerated() {
                 armadilloPlacements[index].rotationAngle += armadilloPlacements[index].angularVelocity * timeStep * 2
                 
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.2, 0.2, 0.2))
+                let scale = armadilloUnitScale * scaleFactor
                 let rotation = simd_float4x4(rotateAbout: armadilloPlacements[index].rotationAxis, byAngle: armadilloPlacements[index].rotationAngle)
                 let translation = simd_float4x4(translate: armadilloPlacements[index].position)
                 
@@ -353,7 +360,7 @@ class Visualization3DTestingContext: Solution3DContext {
             for (index, name) in fruitNames.enumerated() {
                 fruitPlacements[index].rotationAngle += fruitPlacements[index].angularVelocity * timeStep * 2
                 
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.05, 0.05, 0.05))
+                let scale = fruitUnitScale * scaleFactor
                 let rotation = simd_float4x4(rotateAbout: fruitPlacements[index].rotationAxis, byAngle: fruitPlacements[index].rotationAngle)
                 let translation = simd_float4x4(translate: fruitPlacements[index].position)
                 
@@ -365,7 +372,7 @@ class Visualization3DTestingContext: Solution3DContext {
             for (index, name) in shibaNames.enumerated() {
                 shibaPlacements[index].rotationAngle += shibaPlacements[index].angularVelocity * timeStep * 2
                 
-                let scale = simd_float4x4(scale: SIMD3<Float>(0.75, 0.75, 0.75))
+                let scale = shibaUnitScale * scaleFactor
                 let rotation = simd_float4x4(rotateAbout: shibaPlacements[index].rotationAxis, byAngle: shibaPlacements[index].rotationAngle)
                 let translation = simd_float4x4(translate: shibaPlacements[index].position)
                 

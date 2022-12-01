@@ -265,11 +265,22 @@ open class Solution3DContext: SolutionContext {
             sourceMesh.vertexDescriptor = mdlVertexDescriptor
         }
         
+        var maxBounds = SIMD3<Float>(repeating: -.infinity)
+        var minBounds = SIMD3<Float>(repeating: .infinity)
+        
         var submeshes: [SolutionSubmesh] = []
         
         let (mdlMeshes, mtkMeshes) = try MTKMesh.newMeshes(asset: mdlAsset, device: renderer.metalDevice)
         
         for (mdlMesh, mtkMesh) in zip(mdlMeshes, mtkMeshes) {
+            maxBounds.x = max(maxBounds.x, mdlMesh.boundingBox.maxBounds.x)
+            maxBounds.y = max(maxBounds.y, mdlMesh.boundingBox.maxBounds.y)
+            maxBounds.z = max(maxBounds.z, mdlMesh.boundingBox.maxBounds.z)
+            
+            minBounds.x = min(minBounds.x, mdlMesh.boundingBox.minBounds.x)
+            minBounds.y = min(minBounds.y, mdlMesh.boundingBox.minBounds.y)
+            minBounds.z = min(minBounds.z, mdlMesh.boundingBox.minBounds.z)
+            
             var materials: [SolutionMaterial] = []
             
             for mdlSubmesh in mdlMesh.submeshes as! [MDLSubmesh] {
@@ -283,11 +294,12 @@ open class Solution3DContext: SolutionContext {
             submeshes.append(submesh)
         }
         
-        let mesh = SolutionMesh(name: name, submeshes: submeshes)
+        let mesh = SolutionMesh(name: name, bounds: maxBounds - minBounds, submeshes: submeshes)
         meshesTable[name] = mesh
     }
     
     private func loadSimpleMesh(name: String,
+                                bounds: SIMD3<Float>,
                                 mtkMesh: MTKMesh,
                                 baseColor: SIMD4<Float> = DefaultBaseColor, baseColorTexture: String? = nil,
                                 emissiveColor: SIMD4<Float> = DefaultEmissiveColor, emissiveTexture: String? = nil,
@@ -311,7 +323,7 @@ open class Solution3DContext: SolutionContext {
         if let normalTexture { material.normalTexture = textures[normalTexture] }
         
         let submesh = SolutionSubmesh(mtkMesh: mtkMesh, materials: [material])
-        let mesh = SolutionMesh(name: name, submeshes: [submesh])
+        let mesh = SolutionMesh(name: name, bounds: bounds, submeshes: [submesh])
         
         meshesTable[name] = mesh
     }
@@ -338,6 +350,7 @@ open class Solution3DContext: SolutionContext {
         
         loadSimpleMesh(
             name: name,
+            bounds: mdlMesh.boundingBox.maxBounds - mdlMesh.boundingBox.minBounds,
             mtkMesh: mtkMesh,
             baseColor: baseColor,
             baseColorTexture: baseColorTexture,
@@ -375,6 +388,7 @@ open class Solution3DContext: SolutionContext {
         
         loadSimpleMesh(
             name: name,
+            bounds: mdlMesh.boundingBox.maxBounds - mdlMesh.boundingBox.minBounds,
             mtkMesh: mtkMesh,
             baseColor: baseColor,
             baseColorTexture: baseColorTexture,
@@ -412,6 +426,7 @@ open class Solution3DContext: SolutionContext {
         
         loadSimpleMesh(
             name: name,
+            bounds: mdlMesh.boundingBox.maxBounds - mdlMesh.boundingBox.minBounds,
             mtkMesh: mtkMesh,
             baseColor: baseColor,
             baseColorTexture: baseColorTexture,
@@ -883,5 +898,13 @@ open class Solution3DContext: SolutionContext {
         currentConstantBufferOffset = allocationOffset + size
         
         return allocationOffset
+    }
+    
+    public func unitScale(forMesh meshName: String) -> simd_float4x4 {
+        guard let mesh = meshesTable[meshName] else {
+            return matrix_identity_float4x4
+        }
+        
+        return mesh.unitScale
     }
 }

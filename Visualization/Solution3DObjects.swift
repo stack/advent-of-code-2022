@@ -80,10 +80,22 @@ class SolutionNode {
 
 struct SolutionMesh {
     let name: String
+    let bounds: SIMD3<Float>
     var submeshes: [SolutionSubmesh]
     
-    init(name: String, submeshes: [SolutionSubmesh]) {
+    var unitScale: simd_float4x4 {
+        var factor = bounds.max()
+        
+        if factor == 0.0 {
+            factor = 1.0
+        }
+        
+        return simd_float4x4(scale: SIMD3<Float>(repeating: 1.0 / factor))
+    }
+    
+    init(name: String, bounds: SIMD3<Float>, submeshes: [SolutionSubmesh]) {
         self.name = name
+        self.bounds = bounds
         self.submeshes = submeshes
     }
 }
