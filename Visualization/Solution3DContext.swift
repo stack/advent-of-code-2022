@@ -900,6 +900,43 @@ open class Solution3DContext: SolutionContext {
         return allocationOffset
     }
     
+    public func easeInOutQuad(_ progress: Float) -> Float {
+        let result = progress < 0.5 ? 2 * progress * progress : 1 - pow(-2 * progress + 2, 2) / 2
+        return result
+    }
+    
+    public func easeInOutSine(_ progress: Float) -> Float {
+        let result = -(cos(.pi * progress) - 1) / 2
+        return result
+    }
+    
+    public func easeInQuad(_ progress: Float) -> Float {
+        return progress * progress
+    }
+    
+    public func easeInSine(_ progress: Float) -> Float {
+        let result = 1 - cos((progress * .pi) / 2.0)
+        return result
+    }
+    
+    public func easeOutQuad(_ progress: Float) -> Float {
+        return 1.0 - (1.0 - progress) * (1.0 - progress)
+    }
+    
+    public func easeOutSine(_ progress: Float) -> Float {
+        let result = sin((progress * .pi) / 2.0)
+        return result
+    }
+    
+    public func lerp(start: Float, end: Float, percent: Float) -> Float {
+        let result = start + (end - start) * percent
+        return result
+    }
+    
+    public func linear(_ progress: Float) -> Float {
+        return progress
+    }
+    
     public func unitScale(forMesh meshName: String) -> simd_float4x4 {
         guard let mesh = meshesTable[meshName] else {
             return matrix_identity_float4x4

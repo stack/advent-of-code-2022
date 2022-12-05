@@ -160,8 +160,17 @@ float GJointSmith(float alphaSq, float NdotL, float NdotV) {
 
 float DTrowbridgeReitz(float alphaSq, float NdotH) {
     float c = (NdotH * NdotH) * (alphaSq - 1.0f) + 1.0f;
-    return step(0.0f, NdotH) * alphaSq / (M_PI_F * (c * c));
+    c = max(c, 0.1); // HACK: This is preventing blown out pixels, but I'm unsure why
+    
+    float numer1 = step(0.0f, NdotH);
+    float numer2 = alphaSq;
+    float numer = numer1 * numer2;
+    
+    float denom = M_PI_F * (c * c);
+    
+    return numer / denom;
 }
+    
 float3 FSchlick(float3 F0, float VdotH) {
     return F0 + (1.0f - F0) * powr(1.0f - abs(VdotH), 5.0f);
 }

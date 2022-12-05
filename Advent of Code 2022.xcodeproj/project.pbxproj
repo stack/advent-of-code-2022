@@ -61,6 +61,17 @@
 		DC310E23293E24AE004FB3D0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E22293E24AE004FB3D0 /* main.swift */; };
 		DC310E28293E24FB004FB3D0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E27293E24FB004FB3D0 /* Data.swift */; };
 		DC310E2A293E25FA004FB3D0 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DC310E29293E25FA004FB3D0 /* Algorithms */; };
+		DC310E32293E34E1004FB3D0 /* Day05VisualizedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E31293E34E1004FB3D0 /* Day05VisualizedApp.swift */; };
+		DC310E36293E34E2004FB3D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC310E35293E34E2004FB3D0 /* Assets.xcassets */; };
+		DC310E3A293E34E2004FB3D0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC310E39293E34E2004FB3D0 /* Preview Assets.xcassets */; };
+		DC310E3E293E357C004FB3D0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E27293E24FB004FB3D0 /* Data.swift */; };
+		DC310E40293E3597004FB3D0 /* Shipyard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E3F293E3597004FB3D0 /* Shipyard.swift */; };
+		DC310E41293E35CB004FB3D0 /* Shipyard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E3F293E3597004FB3D0 /* Shipyard.swift */; };
+		DC310E43293E360C004FB3D0 /* Wooden_Crate.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC310E42293E360C004FB3D0 /* Wooden_Crate.usdz */; };
+		DC310E45293E3654004FB3D0 /* ShipyardContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E44293E3654004FB3D0 /* ShipyardContext.swift */; };
+		DC310E46293E368E004FB3D0 /* Visualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; };
+		DC310E47293E368E004FB3D0 /* Visualization.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC05EDB32914525D004FF9ED /* Visualization.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DC310E4C293E36B5004FB3D0 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DC310E4B293E36B5004FB3D0 /* Algorithms */; };
 		DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D62926B839004E00CD /* Shiba.usdz */; };
 		DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D82926B83F004E00CD /* Viking Room.usdz */; };
 		DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6DA2926B844004E00CD /* Stone Block.usdz */; };
@@ -109,6 +120,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = DC05ED8B2914505A004FF9ED;
 			remoteInfo = Utilities;
+		};
+		DC310E48293E368E004FB3D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DC54E1A12913EF3900C718F3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DC05EDB22914525D004FF9ED;
+			remoteInfo = Visualization;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -181,6 +199,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		DC310E4A293E368E004FB3D0 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DC310E47293E368E004FB3D0 /* Visualization.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -232,6 +261,14 @@
 		DC310E20293E24AD004FB3D0 /* Day 05 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Day 05"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC310E22293E24AE004FB3D0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DC310E27293E24FB004FB3D0 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
+		DC310E2F293E34E1004FB3D0 /* Day 05 - Visualized.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Day 05 - Visualized.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC310E31293E34E1004FB3D0 /* Day05VisualizedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day05VisualizedApp.swift; sourceTree = "<group>"; };
+		DC310E35293E34E2004FB3D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DC310E37293E34E2004FB3D0 /* Day05Visualized.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Day05Visualized.entitlements; sourceTree = "<group>"; };
+		DC310E39293E34E2004FB3D0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DC310E3F293E3597004FB3D0 /* Shipyard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shipyard.swift; sourceTree = "<group>"; };
+		DC310E42293E360C004FB3D0 /* Wooden_Crate.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Wooden_Crate.usdz; sourceTree = "<group>"; };
+		DC310E44293E3654004FB3D0 /* ShipyardContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShipyardContext.swift; sourceTree = "<group>"; };
 		DC37C6D62926B839004E00CD /* Shiba.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Shiba.usdz; sourceTree = "<group>"; };
 		DC37C6D82926B83F004E00CD /* Viking Room.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Viking Room.usdz"; sourceTree = "<group>"; };
 		DC37C6DA2926B844004E00CD /* Stone Block.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Stone Block.usdz"; sourceTree = "<group>"; };
@@ -321,6 +358,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC310E2A293E25FA004FB3D0 /* Algorithms in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC310E2C293E34E1004FB3D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC310E4C293E36B5004FB3D0 /* Algorithms in Frameworks */,
+				DC310E46293E368E004FB3D0 /* Visualization.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,8 +531,30 @@
 			children = (
 				DC310E22293E24AE004FB3D0 /* main.swift */,
 				DC310E27293E24FB004FB3D0 /* Data.swift */,
+				DC310E3F293E3597004FB3D0 /* Shipyard.swift */,
 			);
 			path = "Day 05";
+			sourceTree = "<group>";
+		};
+		DC310E30293E34E1004FB3D0 /* Day 05 - Visualized */ = {
+			isa = PBXGroup;
+			children = (
+				DC310E35293E34E2004FB3D0 /* Assets.xcassets */,
+				DC310E37293E34E2004FB3D0 /* Day05Visualized.entitlements */,
+				DC310E31293E34E1004FB3D0 /* Day05VisualizedApp.swift */,
+				DC310E38293E34E2004FB3D0 /* Preview Content */,
+				DC310E44293E3654004FB3D0 /* ShipyardContext.swift */,
+				DC310E42293E360C004FB3D0 /* Wooden_Crate.usdz */,
+			);
+			path = "Day 05 - Visualized";
+			sourceTree = "<group>";
+		};
+		DC310E38293E34E2004FB3D0 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				DC310E39293E34E2004FB3D0 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		DC54E1A02913EF3900C718F3 = {
@@ -498,6 +566,7 @@
 				D10F1009293B7EAA008B64ED /* Day 03 */,
 				D10F1018293CCAC3008B64ED /* Day 04 */,
 				DC310E21293E24AE004FB3D0 /* Day 05 */,
+				DC310E30293E34E1004FB3D0 /* Day 05 - Visualized */,
 				DC54E1AE2913EF8000C718F3 /* Visualization Testing */,
 				D1798C9B292057C1001C64C0 /* Visualization 3D Testing */,
 				DC05ED8D2914505A004FF9ED /* Utilities */,
@@ -521,6 +590,7 @@
 				D10F1008293B7EAA008B64ED /* Day 03 */,
 				D10F1017293CCAC3008B64ED /* Day 04 */,
 				DC310E20293E24AD004FB3D0 /* Day 05 */,
+				DC310E2F293E34E1004FB3D0 /* Day 05 - Visualized.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -735,6 +805,28 @@
 			productReference = DC310E20293E24AD004FB3D0 /* Day 05 */;
 			productType = "com.apple.product-type.tool";
 		};
+		DC310E2E293E34E1004FB3D0 /* Day 05 - Visualized */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DC310E3B293E34E2004FB3D0 /* Build configuration list for PBXNativeTarget "Day 05 - Visualized" */;
+			buildPhases = (
+				DC310E2B293E34E1004FB3D0 /* Sources */,
+				DC310E2C293E34E1004FB3D0 /* Frameworks */,
+				DC310E2D293E34E1004FB3D0 /* Resources */,
+				DC310E4A293E368E004FB3D0 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DC310E49293E368E004FB3D0 /* PBXTargetDependency */,
+			);
+			name = "Day 05 - Visualized";
+			packageProductDependencies = (
+				DC310E4B293E36B5004FB3D0 /* Algorithms */,
+			);
+			productName = "Day 05 - Visualized";
+			productReference = DC310E2F293E34E1004FB3D0 /* Day 05 - Visualized.app */;
+			productType = "com.apple.product-type.application";
+		};
 		DC54E1AB2913EF8000C718F3 /* Visualization Testing */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DC54E1B92913EF8100C718F3 /* Build configuration list for PBXNativeTarget "Visualization Testing" */;
@@ -793,6 +885,9 @@
 					DC310E1F293E24AD004FB3D0 = {
 						CreatedOnToolsVersion = 14.1;
 					};
+					DC310E2E293E34E1004FB3D0 = {
+						CreatedOnToolsVersion = 14.1;
+					};
 					DC54E1AB2913EF8000C718F3 = {
 						CreatedOnToolsVersion = 14.1;
 					};
@@ -819,6 +914,7 @@
 				D10F1007293B7EAA008B64ED /* Day 03 */,
 				D10F1016293CCAC3008B64ED /* Day 04 */,
 				DC310E1F293E24AD004FB3D0 /* Day 05 */,
+				DC310E2E293E34E1004FB3D0 /* Day 05 - Visualized */,
 				DC54E1AB2913EF8000C718F3 /* Visualization Testing */,
 				D1798C99292057C1001C64C0 /* Visualization 3D Testing */,
 				DC05ED8B2914505A004FF9ED /* Utilities */,
@@ -868,6 +964,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC310E2D293E34E1004FB3D0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC310E43293E360C004FB3D0 /* Wooden_Crate.usdz in Resources */,
+				DC310E3A293E34E2004FB3D0 /* Preview Assets.xcassets in Resources */,
+				DC310E36293E34E2004FB3D0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -969,8 +1075,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC310E40293E3597004FB3D0 /* Shipyard.swift in Sources */,
 				DC310E23293E24AE004FB3D0 /* main.swift in Sources */,
 				DC310E28293E24FB004FB3D0 /* Data.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC310E2B293E34E1004FB3D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC310E45293E3654004FB3D0 /* ShipyardContext.swift in Sources */,
+				DC310E41293E35CB004FB3D0 /* Shipyard.swift in Sources */,
+				DC310E3E293E357C004FB3D0 /* Data.swift in Sources */,
+				DC310E32293E34E1004FB3D0 /* Day05VisualizedApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1010,6 +1128,11 @@
 			isa = PBXTargetDependency;
 			target = DC05ED8B2914505A004FF9ED /* Utilities */;
 			targetProxy = DC05ED952914505A004FF9ED /* PBXContainerItemProxy */;
+		};
+		DC310E49293E368E004FB3D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DC05EDB22914525D004FF9ED /* Visualization */;
+			targetProxy = DC310E48293E368E004FB3D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2289,6 +2412,181 @@
 			};
 			name = Release;
 		};
+		DC310E3C293E34E2004FB3D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "Day 05 - Visualized/Day05Visualized.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_ASSET_PATHS = "\"Day 05 - Visualized/Preview Content\"";
+				DEVELOPMENT_TEAM = GE3GZ86XX9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_MetalCaptureEnabled = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "us.gerstacker.advent-of-code.2022.day05.visualized";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DC310E3D293E34E2004FB3D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "Day 05 - Visualized/Day05Visualized.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_ASSET_PATHS = "\"Day 05 - Visualized/Preview Content\"";
+				DEVELOPMENT_TEAM = GE3GZ86XX9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_MetalCaptureEnabled = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "us.gerstacker.advent-of-code.2022.day05.visualized";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DC54E1A52913EF3900C718F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2578,6 +2876,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DC310E3B293E34E2004FB3D0 /* Build configuration list for PBXNativeTarget "Day 05 - Visualized" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC310E3C293E34E2004FB3D0 /* Debug */,
+				DC310E3D293E34E2004FB3D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DC54E1A42913EF3900C718F3 /* Build configuration list for PBXProject "Advent of Code 2022" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2621,6 +2928,11 @@
 			productName = Algorithms;
 		};
 		DC310E29293E25FA004FB3D0 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DC310E192938F5A1004FB3D0 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		DC310E4B293E36B5004FB3D0 /* Algorithms */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DC310E192938F5A1004FB3D0 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
 			productName = Algorithms;
