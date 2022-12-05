@@ -58,6 +58,9 @@
 		DC310E132938E091004FB3D0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E122938E091004FB3D0 /* main.swift */; };
 		DC310E182938E0B7004FB3D0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E172938E0B7004FB3D0 /* Data.swift */; };
 		DC310E1B2938F5A1004FB3D0 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DC310E1A2938F5A1004FB3D0 /* Algorithms */; };
+		DC310E23293E24AE004FB3D0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E22293E24AE004FB3D0 /* main.swift */; };
+		DC310E28293E24FB004FB3D0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC310E27293E24FB004FB3D0 /* Data.swift */; };
+		DC310E2A293E25FA004FB3D0 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = DC310E29293E25FA004FB3D0 /* Algorithms */; };
 		DC37C6D72926B839004E00CD /* Shiba.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D62926B839004E00CD /* Shiba.usdz */; };
 		DC37C6D92926B83F004E00CD /* Viking Room.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6D82926B83F004E00CD /* Viking Room.usdz */; };
 		DC37C6DB2926B844004E00CD /* Stone Block.usdz in Resources */ = {isa = PBXBuildFile; fileRef = DC37C6DA2926B844004E00CD /* Stone Block.usdz */; };
@@ -169,6 +172,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		DC310E1E293E24AD004FB3D0 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -217,6 +229,9 @@
 		DC310E102938E091004FB3D0 /* Day 01 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Day 01"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC310E122938E091004FB3D0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DC310E172938E0B7004FB3D0 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
+		DC310E20293E24AD004FB3D0 /* Day 05 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Day 05"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC310E22293E24AE004FB3D0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		DC310E27293E24FB004FB3D0 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		DC37C6D62926B839004E00CD /* Shiba.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Shiba.usdz; sourceTree = "<group>"; };
 		DC37C6D82926B83F004E00CD /* Viking Room.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Viking Room.usdz"; sourceTree = "<group>"; };
 		DC37C6DA2926B844004E00CD /* Stone Block.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = "Stone Block.usdz"; sourceTree = "<group>"; };
@@ -298,6 +313,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC310E1B2938F5A1004FB3D0 /* Algorithms in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC310E1D293E24AD004FB3D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC310E2A293E25FA004FB3D0 /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,6 +480,15 @@
 			path = "Day 01";
 			sourceTree = "<group>";
 		};
+		DC310E21293E24AE004FB3D0 /* Day 05 */ = {
+			isa = PBXGroup;
+			children = (
+				DC310E22293E24AE004FB3D0 /* main.swift */,
+				DC310E27293E24FB004FB3D0 /* Data.swift */,
+			);
+			path = "Day 05";
+			sourceTree = "<group>";
+		};
 		DC54E1A02913EF3900C718F3 = {
 			isa = PBXGroup;
 			children = (
@@ -465,6 +497,7 @@
 				D10F0FDE293A1E3A008B64ED /* Day 02 */,
 				D10F1009293B7EAA008B64ED /* Day 03 */,
 				D10F1018293CCAC3008B64ED /* Day 04 */,
+				DC310E21293E24AE004FB3D0 /* Day 05 */,
 				DC54E1AE2913EF8000C718F3 /* Visualization Testing */,
 				D1798C9B292057C1001C64C0 /* Visualization 3D Testing */,
 				DC05ED8D2914505A004FF9ED /* Utilities */,
@@ -487,6 +520,7 @@
 				D10F0FDD293A1E3A008B64ED /* Day 02 */,
 				D10F1008293B7EAA008B64ED /* Day 03 */,
 				D10F1017293CCAC3008B64ED /* Day 04 */,
+				DC310E20293E24AD004FB3D0 /* Day 05 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -681,6 +715,26 @@
 			productReference = DC310E102938E091004FB3D0 /* Day 01 */;
 			productType = "com.apple.product-type.tool";
 		};
+		DC310E1F293E24AD004FB3D0 /* Day 05 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DC310E26293E24AE004FB3D0 /* Build configuration list for PBXNativeTarget "Day 05" */;
+			buildPhases = (
+				DC310E1C293E24AD004FB3D0 /* Sources */,
+				DC310E1D293E24AD004FB3D0 /* Frameworks */,
+				DC310E1E293E24AD004FB3D0 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Day 05";
+			packageProductDependencies = (
+				DC310E29293E25FA004FB3D0 /* Algorithms */,
+			);
+			productName = "Day 05";
+			productReference = DC310E20293E24AD004FB3D0 /* Day 05 */;
+			productType = "com.apple.product-type.tool";
+		};
 		DC54E1AB2913EF8000C718F3 /* Visualization Testing */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DC54E1B92913EF8100C718F3 /* Build configuration list for PBXNativeTarget "Visualization Testing" */;
@@ -736,6 +790,9 @@
 					DC310E0F2938E091004FB3D0 = {
 						CreatedOnToolsVersion = 14.1;
 					};
+					DC310E1F293E24AD004FB3D0 = {
+						CreatedOnToolsVersion = 14.1;
+					};
 					DC54E1AB2913EF8000C718F3 = {
 						CreatedOnToolsVersion = 14.1;
 					};
@@ -761,6 +818,7 @@
 				D10F0FDC293A1E3A008B64ED /* Day 02 */,
 				D10F1007293B7EAA008B64ED /* Day 03 */,
 				D10F1016293CCAC3008B64ED /* Day 04 */,
+				DC310E1F293E24AD004FB3D0 /* Day 05 */,
 				DC54E1AB2913EF8000C718F3 /* Visualization Testing */,
 				D1798C99292057C1001C64C0 /* Visualization 3D Testing */,
 				DC05ED8B2914505A004FF9ED /* Utilities */,
@@ -904,6 +962,15 @@
 			files = (
 				DC310E132938E091004FB3D0 /* main.swift in Sources */,
 				DC310E182938E0B7004FB3D0 /* Data.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DC310E1C293E24AD004FB3D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC310E23293E24AE004FB3D0 /* main.swift in Sources */,
+				DC310E28293E24FB004FB3D0 /* Data.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2099,6 +2166,129 @@
 			};
 			name = Release;
 		};
+		DC310E24293E24AE004FB3D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = GE3GZ86XX9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DC310E25293E24AE004FB3D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = GE3GZ86XX9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		DC54E1A52913EF3900C718F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2379,6 +2569,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DC310E26293E24AE004FB3D0 /* Build configuration list for PBXNativeTarget "Day 05" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC310E24293E24AE004FB3D0 /* Debug */,
+				DC310E25293E24AE004FB3D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DC54E1A42913EF3900C718F3 /* Build configuration list for PBXProject "Advent of Code 2022" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2417,6 +2616,11 @@
 			productName = Algorithms;
 		};
 		DC310E1A2938F5A1004FB3D0 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DC310E192938F5A1004FB3D0 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		DC310E29293E25FA004FB3D0 /* Algorithms */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DC310E192938F5A1004FB3D0 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
 			productName = Algorithms;
