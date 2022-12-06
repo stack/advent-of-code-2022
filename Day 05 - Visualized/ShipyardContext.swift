@@ -39,9 +39,96 @@ class ShipyardContext: Solution3DContext {
             testShipyard.parseLine(line)
             
             if testShipyard.parserMode == .moves && previousMode == .crates {
-                for stack in testShipyard.stacks {
+                for (stackIndex, stack) in testShipyard.stacks.enumerated() {
+                    let numberText = String(stackIndex + 1)
+                    
+                    createTexture(name: "Number \(stackIndex + 1)", width: 512, height: 512) { context in
+                        let rect = CGRect(x: 0, y: 0, width: context.width, height: context.height)
+                        let font = NativeFont(name: "Chalkduster", size: 160.0)
+                        let color = CGColor.white
+                        
+                        let finalRect = CGRect(x: rect.origin.x, y: CGFloat(context.height) - rect.origin.y - rect.size.height, width: rect.size.width, height: rect.size.height)
+                        
+                        let textAttributed = NSAttributedString(string: numberText)
+                        
+                        let cfText = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, numberText.count, textAttributed)!
+                        let cfTextLength = CFAttributedStringGetLength(cfText)
+                        
+                        let textRange = CFRange(location: 0, length: cfTextLength)
+                        
+                        CFAttributedStringSetAttribute(cfText, textRange, kCTFontAttributeName, font)
+                        CFAttributedStringSetAttribute(cfText, textRange, kCTForegroundColorAttributeName, color)
+                        
+                        let maxSize = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+                        let frameSetter = CTFramesetterCreateWithAttributedString(cfText)
+                        let textSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, textRange, nil, maxSize, nil)
+                        
+                        let xOffset = (finalRect.width - textSize.width) / 2.0
+                        let yOffset = (finalRect.height - textSize.height) / 2.0
+                        
+                        let centeredFrame = finalRect.insetBy(dx: xOffset, dy: yOffset)
+                        
+                        let path = CGMutablePath()
+                        path.addRect(centeredFrame)
+                        
+                        let ctFrame = CTFramesetterCreateFrame(frameSetter, textRange, path, nil)
+                        
+                        CTFrameDraw(ctFrame, context)
+                    }
+                    
+                    try loadPlaneMesh(name: "Number Plane \(stackIndex + 1)", extents: SIMD3<Float>(1, 0, 1), emissiveTexture: "Number \(stackIndex + 1)")
+                    
+                    addNode(name: "Number \(stackIndex + 1)", mesh: "Number Plane \(stackIndex + 1)")
+                    
                     for crate in stack {
+                        let letterName = "Letter \(crate.value)"
+                        
+                        if !textureExists(name: letterName) {
+                            createTexture(name: letterName, width: 256, height: 256) { context in
+                                let rect = CGRect(x: 0, y: 0, width: context.width, height: context.height)
+                                let font = NativeFont(name: "Chalkduster", size: 80.0)
+                                let color = CGColor.white
+                                
+                                let finalRect = CGRect(x: rect.origin.x, y: CGFloat(context.height) - rect.origin.y - rect.size.height, width: rect.size.width, height: rect.size.height)
+                                
+                                let textAttributed = NSAttributedString(string: crate.value)
+                                
+                                let cfText = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, crate.value.count, textAttributed)!
+                                let cfTextLength = CFAttributedStringGetLength(cfText)
+                                
+                                let textRange = CFRange(location: 0, length: cfTextLength)
+                                
+                                CFAttributedStringSetAttribute(cfText, textRange, kCTFontAttributeName, font)
+                                CFAttributedStringSetAttribute(cfText, textRange, kCTForegroundColorAttributeName, color)
+                                
+                                let maxSize = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+                                let frameSetter = CTFramesetterCreateWithAttributedString(cfText)
+                                let textSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, textRange, nil, maxSize, nil)
+                                
+                                let xOffset = (finalRect.width - textSize.width) / 2.0
+                                let yOffset = (finalRect.height - textSize.height) / 2.0
+                                
+                                let centeredFrame = finalRect.insetBy(dx: xOffset, dy: yOffset)
+                                
+                                let path = CGMutablePath()
+                                path.addRect(centeredFrame)
+                                
+                                let ctFrame = CTFramesetterCreateFrame(frameSetter, textRange, path, nil)
+                                
+                                CTFrameDraw(ctFrame, context)
+                            }
+                            
+                            try loadPlaneMesh(name: "Letter Plane \(crate.value)", extents: SIMD3<Float>(2, 2, 0), baseColorTexture: letterName)
+                        }
+                        
                         addNode(name: "Crate \(crate.id)", mesh: "Crate", batch: "Crate")
+                        addNode(name: "Crate \(crate.id) Letter", mesh: "Letter Plane \(crate.value)", parent: "Crate \(crate.id)")
+                        
+                        let rotate = simd_float4x4(rotateAbout: SIMD3<Float>(1, 0, 0), byAngle: .pi)
+                        let translate = simd_float4x4(translate: SIMD3<Float>(0, 0, 1.0))
+                        let transform = translate * rotate
+                        
+                        updateNode(name: "Crate \(crate.id) Letter", transform: transform)
                     }
                 }
                 
@@ -70,6 +157,14 @@ class ShipyardContext: Solution3DContext {
         updateLight(name: "Point 3", transform: simd_float4x4(translate: SIMD3<Float>(0, 0, 10)))
         
         updateCamera(eye: SIMD3<Float>(0, 0, 20), lookAt: SIMD3<Float>(0, bottom, -30), up: SIMD3<Float>(0, 1, 0))
+        
+        for stackIndex in (0 ..< testShipyard.stacks.count) {
+            updateNode(
+                name: "Number \(stackIndex + 1)",
+                transform: simd_float4x4(translate: SIMD3<Float>(left + Float(stackIndex), bottom - 0.5, 1)),
+                baseColor: SIMD4<Float>(0, 0, 0, 1)
+            )
+        }
         
         // Run the simulation again, this time rendering the results
         let shipyard = Shipyard(mode: .model9000, shouldDump: false)

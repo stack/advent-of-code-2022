@@ -176,10 +176,10 @@ open class Solution3DContext: SolutionContext {
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "SolutionVertex")
         pipelineDescriptor.fragmentFunction = library.makeFunction(name: "SolutionFragment")
         pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
-        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .one
+        pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
         pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
         pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
-        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .one
+        pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
         pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
         pipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
         pipelineDescriptor.label = "Main Pipeline"
@@ -241,6 +241,42 @@ open class Solution3DContext: SolutionContext {
     }
     
     // MARK: - Asset Management (New)
+    
+    public func createTexture(name: String, width: Int, height: Int, draw: (CGContext) -> Void) {
+        let rowAlignment = renderer.metalDevice.minimumTextureBufferAlignment(for: .rgba8Unorm)
+        let bytesPerRow = align(width * 4, upTo: rowAlignment)
+        let pageSize = Int(getpagesize())
+        let allocationSize = align(bytesPerRow * height, upTo: pageSize)
+        
+        var data: UnsafeMutableRawPointer? = nil
+        posix_memalign(&data, pageSize, allocationSize)
+        memset(data!, 0, allocationSize)
+        
+        let context = CGContext(
+            data: data,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        )!
+        
+        draw(context)
+        
+        let buffer = renderer.metalDevice.makeBuffer(bytes: data!, length: allocationSize, options: .storageModeShared)!
+        
+        let textureDescriptor = MTLTextureDescriptor()
+        textureDescriptor.pixelFormat = .rgba8Unorm
+        textureDescriptor.width = width
+        textureDescriptor.height = height
+        textureDescriptor.storageMode = .shared
+        textureDescriptor.usage = .shaderRead
+        
+        let texture = buffer.makeTexture(descriptor: textureDescriptor, offset: 0, bytesPerRow: context.bytesPerRow)
+        
+        textures[name] = texture
+    }
     
     public func loadMesh(name: String, fromResource resource: String) throws {
         guard let url = Bundle.main.url(forResource: resource, withExtension: "usdz") else {
@@ -450,6 +486,12 @@ open class Solution3DContext: SolutionContext {
         let texture = try textureLoader.newTexture(URL: url, options: textureOptions)
         
         textures[name] = texture
+    }
+    
+    public func textureExists(name: String) -> Bool {
+        let texture = textures[name]
+        
+        return texture != nil
     }
     
     // MARK: - Node Management
@@ -681,8 +723,8 @@ open class Solution3DContext: SolutionContext {
         encoder.setFragmentBuffer(constantBuffer, offset: frameConstantsOffset, index: FragmentBufferIndex.frameConstants)
         encoder.setFragmentBuffer(constantBuffer, offset: lightConstantsOffset, index: FragmentBufferIndex.lightConstants)
         
-        drawNodesSingle(encoder: encoder)
         drawNodesBatched(encoder: encoder)
+        drawNodesSingle(encoder: encoder)
         
         encoder.endEncoding()
     }

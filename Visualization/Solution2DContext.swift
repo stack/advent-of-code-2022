@@ -101,7 +101,6 @@ open class Solution2DContext: SolutionContext {
         
         let textAttributed = NSAttributedString(string: text)
         
-        
         let cfText = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, text.count, textAttributed)!
         let cfTextLength = CFAttributedStringGetLength(cfText)
         

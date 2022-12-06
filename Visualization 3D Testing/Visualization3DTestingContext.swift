@@ -25,8 +25,57 @@ class Visualization3DTestingContext: Solution3DContext {
         // try runVikingRoom()
         // try runShiba()
         // try runChaos()
-        try runInstances()
+        // try runInstances()
         // try runFancyBoxes()
+        try runGeneratedTextures()
+    }
+    
+    private func runGeneratedTextures() throws {
+        createTexture(name: "Texture 1", width: 512, height: 512) { context in
+            let rect = CGRect(x: 0, y: 0, width: context.width, height: context.height)
+            let text = "M"
+            let font = NativeFont(name: "Chalkduster", size: 40.0)
+            let color = CGColor.white
+            
+            let finalRect = CGRect(x: rect.origin.x, y: CGFloat(context.height) - rect.origin.y - rect.size.height, width: rect.size.width, height: rect.size.height)
+            
+            let textAttributed = NSAttributedString(string: text)
+            
+            let cfText = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, text.count, textAttributed)!
+            let cfTextLength = CFAttributedStringGetLength(cfText)
+            
+            let textRange = CFRange(location: 0, length: cfTextLength)
+            
+            CFAttributedStringSetAttribute(cfText, textRange, kCTFontAttributeName, font)
+            CFAttributedStringSetAttribute(cfText, textRange, kCTForegroundColorAttributeName, color)
+            
+            let maxSize = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+            let frameSetter = CTFramesetterCreateWithAttributedString(cfText)
+            let textSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, textRange, nil, maxSize, nil)
+            
+            let xOffset = (finalRect.width - textSize.width) / 2.0
+            let yOffset = (finalRect.height - textSize.height) / 2.0
+            
+            let centeredFrame = finalRect.insetBy(dx: xOffset, dy: yOffset)
+            
+            let path = CGMutablePath()
+            path.addRect(centeredFrame)
+            
+            let ctFrame = CTFramesetterCreateFrame(frameSetter, textRange, path, nil)
+            
+            CTFrameDraw(ctFrame, context)
+        }
+        
+        try loadPlaneMesh(name: "Plane", extents: SIMD3<Float>(1, 1, 0), emissiveTexture: "Texture 1")
+        
+        addNode(name: "Node", mesh: "Plane")
+        updateNode(name: "Node", transform: simd_float4x4(rotateAbout: SIMD3<Float>(1, 0, 0), byAngle: .pi))
+        
+        updateCamera(eye: SIMD3<Float>(0, 0, 2), lookAt: SIMD3<Float>(0, 0, 0), up: SIMD3<Float>(0, 1, 0))
+        
+        for _ in 0 ..< 2000 {
+            try snapshot()
+        }
     }
     
     private func runBoxes() throws {
