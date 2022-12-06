@@ -214,11 +214,11 @@ class ShipyardContext: Solution3DContext {
         let yDistance = endY - startY
         let distance = sqrt(Float(xDistance * xDistance) + Float(yDistance * yDistance))
         
-        let timePerUnit: Float = 0.1
+        let timePerUnit: Float = 0.05
         let totalTime = timePerUnit * distance
-        let totalFrames = Int(round(totalTime * Float(frameRate)))
+        let totalFrames = Int(ceil(totalTime * Float(frameRate)))
         
-        for frame in (0 ..< totalFrames) {
+        for frame in (0 ... totalFrames) {
             let progress = Float(frame) / Float(totalFrames)
             let curvedProgress = easeInOutQuad(progress)
             
