@@ -14,12 +14,13 @@ were both instrumental in learning how perform rendering in Metal.
 
 [Learn OpenGL][learn-opengl] has a great series on Physically Based Rendering.
 
-[Stone Block][stone-block], [Shiba][shiba], and [Viking Room][viking-room] were obtained via [Sketchfab][sketchfab].
+[Stone Block][stone-block], [Shiba][shiba], [Wooden Crate][wooden-crate], and [Viking Room][viking-room] were obtained via [Sketchfab][sketchfab].
 
   [metal-by-example]: https://metalbyexample.com "Metal by Example"
   [thirty-days-of-metal]: https://medium.com/@warrenm "Warren More - Medium"
   [learn-opengl]: https://learnopengl.com/PBR/Theory "Learn OpenGL PBR Theory"
   [stone-block]: https://sketchfab.com/3d-models/stylized-low-poly-stone-block-8e0ed57a0c204e938437f798f05ae57d "Stone Block"
   [shiba]: https://sketchfab.com/3d-models/shiba-faef9fe5ace445e7b2989d1c1ece361c "Shiba"
+  [wooden-crate]: https://sketchfab.com/3d-models/wooden-crate-2a3ac54357bb4b92bfbc119111c09fd1
   [viking-room]: https://sketchfab.com/3d-models/viking-room-6d61f7f0b597490aab7afa003e4ec725 "Viking Room"
   [sketchfab]: https://sketchfab.com "Sketchfab"
