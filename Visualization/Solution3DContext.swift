@@ -98,6 +98,10 @@ open class Solution3DContext: SolutionContext {
     private var lightsTable: [String:SolutionLight] = [:]
     private var lights: [SolutionLight] = []
     
+    private var perspectiveNear: Float = 0.01
+    private var perspectiveFar: Float = 1000
+    private var perspectiveAngle: Float = .pi / 3
+    
     private var commandQueue: MTLCommandQueue!
     private var constantBuffer: MTLBuffer!
     private var pipelineState: MTLRenderPipelineState!
@@ -581,6 +585,12 @@ open class Solution3DContext: SolutionContext {
         if let color { light.color = color }
     }
     
+    public func updatePerspective(near: Float, far: Float, angle: Float) {
+        perspectiveNear = near
+        perspectiveFar = far
+        perspectiveAngle = angle
+    }
+    
     // MARK: - Drawing
     
     public override func complete() async throws {
@@ -796,16 +806,6 @@ open class Solution3DContext: SolutionContext {
         try autoreleasepool {
             try snapshotInternal()
         }
-    }
-    
-    private var perspectiveNear: Float = 0.01
-    private var perspectiveFar: Float = 1000
-    private var perspectiveAngle: Float = .pi / 3
-    
-    public func updatePerspective(near: Float, far: Float, angle: Float) {
-        perspectiveNear = near
-        perspectiveFar = far
-        perspectiveAngle = angle
     }
     
     private func updateFrameConstants() -> Int {
