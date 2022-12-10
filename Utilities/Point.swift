@@ -9,8 +9,8 @@
 import Foundation
 
 public struct Point: Hashable {
-    public let x: Int
-    public let y: Int
+    public var x: Int
+    public var y: Int
 
     public init(x: Int, y: Int) {
         self.x = x
@@ -25,6 +25,20 @@ public struct Point: Hashable {
         neighbors.append(Point(x: x, y: y - 1))
         neighbors.append(Point(x: x, y: y + 1))
 
+        return neighbors
+    }
+    
+    public var allNeighbors: [Point] {
+        var neighbors: [Point] = []
+        
+        for yOffset in -1...1 {
+            for xOffset in -1...1 {
+                if xOffset == 0 && yOffset == 0 { continue }
+                
+                neighbors.append(Point(x: x + xOffset, y: y + yOffset))
+            }
+        }
+        
         return neighbors
     }
 

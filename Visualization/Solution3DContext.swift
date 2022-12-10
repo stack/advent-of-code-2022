@@ -760,9 +760,17 @@ open class Solution3DContext: SolutionContext {
         
         frameSemaphor.wait()
         
-        updateLightConstants()
-        updateFrameConstants()
-        updateNodeConstants()
+        let lightAllocations = updateLightConstants()
+        let frameAllocations = updateFrameConstants()
+        let nodesAllocations = updateNodeConstants()
+        
+        let totalAllocations = lightAllocations + frameAllocations + nodesAllocations
+        
+        if totalAllocations > MaxConstantsSize / MaxOutstandingFrameCount {
+            fatalError("Insufficient constant storage: frame consumed \(totalAllocations) bytes of total \(MaxConstantsSize) bytes")
+        } else {
+            // print("Allocated \(totalAllocations) inside of \(MaxConstantsSize / MaxOutstandingFrameCount)")
+        }
         
         guard let commandBuffer = commandQueue.makeCommandBuffer() else {
             throw SolutionError.apiError("Could not get a command buffer for the render pass")
@@ -784,7 +792,7 @@ open class Solution3DContext: SolutionContext {
         frameIndex += 1
     }
     
-    private func updateFrameConstants() {
+    private func updateFrameConstants() -> Int {
         let aspectRatio = Float(width) / Float(height)
         let projectionMatrix = simd_float4x4(
             perspectiveProjectionFoVY: .pi / 3,
@@ -808,9 +816,11 @@ open class Solution3DContext: SolutionContext {
 
         let constantsPointer = constantBuffer.contents().advanced(by: frameConstantsOffset)
         constantsPointer.copyMemory(from: &constants, byteCount: constantsLayout.size)
+        
+        return constantsLayout.stride
     }
     
-    private func updateLightConstants() {
+    private func updateLightConstants() -> Int {
         let cameraMatrix = pointOfView
         let viewMatrix = cameraMatrix.inverse
         
@@ -830,16 +840,22 @@ open class Solution3DContext: SolutionContext {
                 intensity: SIMD4<Float>(light.color * light.intensity, 1.0)
             )
         }
+        
+        return lightLayout.stride * lightsTable.count
     }
     
-    private func updateNodeConstants() {
+    private func updateNodeConstants() -> Int {
         nodeConstantsOffset.removeAll(keepingCapacity: true)
 
-        updateNodeConstantsSingle()
-        updateNodeConstantsBatched()
+        var singleAllocation = updateNodeConstantsSingle()
+        var batchAllocation = updateNodeConstantsBatched()
+        
+        return singleAllocation + batchAllocation
     }
     
-    private func updateNodeConstantsSingle() {
+    private func updateNodeConstantsSingle() -> Int {
+        var allocations = 0
+        
         let nodeLayout = MemoryLayout<NodeConstants>.self
         let materialLayout = MemoryLayout<MaterialConstants>.self
         
@@ -859,6 +875,8 @@ open class Solution3DContext: SolutionContext {
             constantsPointer.copyMemory(from: &nodeConstants, byteCount: nodeLayout.stride)
             constantsPointer = constantsPointer.advanced(by: nodeLayout.stride)
             
+            allocations += totalStride
+            
             for submesh in node.mesh.submeshes {
                 for material in submesh.materails {
                     var materialConstants = MaterialConstants(
@@ -877,9 +895,13 @@ open class Solution3DContext: SolutionContext {
             
             nodeConstantsOffset.append(offset)
         }
+        
+        return allocations
     }
     
-    private func updateNodeConstantsBatched() {
+    private func updateNodeConstantsBatched() -> Int {
+        var allocations = 0
+        
         let nodeLayout = MemoryLayout<NodeConstants>.self
         let materialLayout = MemoryLayout<MaterialConstants>.self
         
@@ -907,6 +929,8 @@ open class Solution3DContext: SolutionContext {
             constantsPointer.copyMemory(from: &nodeConstants, byteCount: nodeLayout.stride * nodes.count)
             constantsPointer = constantsPointer.advanced(by: nodeLayout.stride * nodes.count)
             
+            allocations += totalStride
+            
             for submesh in firstNode.mesh.submeshes {
                 for material in submesh.materails {
                     var materialConstants = MaterialConstants(
@@ -925,6 +949,8 @@ open class Solution3DContext: SolutionContext {
             
             nodeConstantsOffset.append(offset)
         }
+        
+        return allocations
     }
     
     // MARK: - Utilities
