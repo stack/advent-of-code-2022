@@ -729,7 +729,7 @@ open class Solution3DContext: SolutionContext {
         encoder.endEncoding()
     }
     
-    public func snapshot() throws {
+    private func snapshotInternal() throws {
         // Get the next CVPixelBuffer
         guard let pool = writerAdaptor?.pixelBufferPool else {
             throw SolutionError.apiError("No pixel buffer pool available")
@@ -792,13 +792,29 @@ open class Solution3DContext: SolutionContext {
         frameIndex += 1
     }
     
+    public func snapshot() throws {
+        try autoreleasepool {
+            try snapshotInternal()
+        }
+    }
+    
+    private var perspectiveNear: Float = 0.01
+    private var perspectiveFar: Float = 1000
+    private var perspectiveAngle: Float = .pi / 3
+    
+    public func updatePerspective(near: Float, far: Float, angle: Float) {
+        perspectiveNear = near
+        perspectiveFar = far
+        perspectiveAngle = angle
+    }
+    
     private func updateFrameConstants() -> Int {
         let aspectRatio = Float(width) / Float(height)
         let projectionMatrix = simd_float4x4(
-            perspectiveProjectionFoVY: .pi / 3,
+            perspectiveProjectionFoVY: perspectiveAngle,
             aspectRatio: aspectRatio,
-            near: 0.01,
-            far: 1000
+            near: perspectiveNear,
+            far: perspectiveFar
         )
         
         let cameraMatrix = pointOfView
@@ -985,6 +1001,13 @@ open class Solution3DContext: SolutionContext {
     public func easeInSine(_ progress: Float) -> Float {
         let result = 1 - cos((progress * .pi) / 2.0)
         return result
+    }
+    
+    public func easeOutBack(_ progress: Float) -> Float {
+        let c1: Float = 1.70158
+        let c3 = c1 + 1
+        
+        return 1.0 + c3 * pow(progress - 1.0, 3.0) + c1 * pow(progress - 1.0, 2.0)
     }
     
     public func easeOutQuad(_ progress: Float) -> Float {

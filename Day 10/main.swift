@@ -8,35 +8,6 @@
 
 import Foundation
 
-class Computer {
-    
-    private(set) var cycle = 0
-    private(set) var registerX = 1
-    
-    func run(inputData: String, onCycle: (String, Int, Int) -> Void) {
-        let addXRegex = /^addx (-?\d+)$/
-        let noopRegex = /^noop$/
-        
-        for line in inputData.components(separatedBy: "\n") {
-            if let match = line.firstMatch(of: addXRegex) {
-                let (_, valueString) = match.output
-                let value = Int(valueString)!
-                
-                cycle += 1
-                onCycle(line, cycle, registerX)
-                
-                cycle += 1
-                onCycle(line, cycle, registerX)
-                
-                registerX += value
-            } else if let _ = line.firstMatch(of: noopRegex) {
-                cycle += 1
-                onCycle(line, cycle, registerX)
-            }
-        }
-    }
-}
-
 // MARK: - Part 1, Sample 1
 
 let computerSample1 = Computer()
@@ -52,9 +23,6 @@ let computerSample2 = Computer()
 
 var sample2Sum = 0
 computerSample2.run(inputData: SampleData2) { instruction, cycle, registerX in
-    // print("         \(instruction)")
-    // print("         [\(cycle)] X: \(registerX)")
-    
     if (cycle - 20) % 40 == 0 {
         sample2Sum += (cycle * registerX)
         print("[\(cycle)] X: \(registerX), SS: \(cycle * registerX), T: \(sample2Sum)")
@@ -89,20 +57,15 @@ let computerSample2Part2 = Computer()
 
 var currentLine = ""
 computerSample2Part2.run(inputData: SampleData2) { _, cycle, registerX in
-    // let row = (cycle - 1) / 40
     let column = (cycle - 1) % 40
     
     let spritePosition = (registerX - 1) ... (registerX + 1)
-    
-    // print("Sprite: \(spritePosition)")
     
     if spritePosition.contains(column) {
         currentLine += "#"
     } else {
         currentLine += "."
     }
-    
-    // print("Row: \(currentLine)")
     
     if column == 39 {
         print(currentLine)
@@ -118,20 +81,15 @@ let computerInput1Part2 = Computer()
 
 currentLine = ""
 computerInput1Part2.run(inputData: InputData) { _, cycle, registerX in
-    // let row = (cycle - 1) / 40
     let column = (cycle - 1) % 40
     
     let spritePosition = (registerX - 1) ... (registerX + 1)
-    
-    // print("Sprite: \(spritePosition)")
     
     if spritePosition.contains(column) {
         currentLine += "#"
     } else {
         currentLine += "."
     }
-    
-    // print("Row: \(currentLine)")
     
     if column == 39 {
         print(currentLine)
