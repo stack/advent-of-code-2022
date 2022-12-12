@@ -3,7 +3,7 @@
 //  Day 05 - Visualized
 //
 //  Created by Stephen Gerstacker on 2022-12-05.
-//  Copyright © 2022 Stephen H. Gerstacker. All rights reserved.
+//  SPDX-License-Identifier: MIT
 //
 
 import Foundation

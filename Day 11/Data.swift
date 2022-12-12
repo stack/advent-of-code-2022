@@ -3,7 +3,7 @@
 //  Day 11
 //
 //  Created by Stephen H. Gerstacker on 2022-12-11.
-//  Copyright © 2022 Stephen H. Gerstacker. All rights reserved.
+//  SPDX-License-Identifier: MIT
 //
 
 import Foundation

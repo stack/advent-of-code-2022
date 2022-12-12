@@ -3,7 +3,7 @@
 //  Visualization 3D Testing
 //
 //  Created by Stephen H. Gerstacker on 2022-11-12.
-//  Copyright © 2022 Stephen H. Gerstacker. All rights reserved.
+//  SPDX-License-Identifier: MIT
 //
 
 import SwiftUI
