@@ -15,7 +15,6 @@ import ModelIO
 import Utilities
 
 fileprivate let MaxOutstandingFrameCount = 3
-fileprivate let MaxConstantsSize = 1024 * 1024 * 3
 fileprivate let MinBufferAlignment = 256
 
 public let DefaultBaseColor = SIMD4<Float>(1, 1, 1, 1)
@@ -106,6 +105,7 @@ open class Solution3DContext: SolutionContext {
     private var constantBuffer: MTLBuffer!
     private var pipelineState: MTLRenderPipelineState!
     private var depthStencilState: MTLDepthStencilState!
+    private let maxConstantsSize: Int
     
     private let sampleCount = 4
     private var msaaTextures: [MTLTexture]!
@@ -122,7 +122,13 @@ open class Solution3DContext: SolutionContext {
     
     // MARK: - Initialization
     
-    public override init(width: Int, height: Int, frameRate: Double) {
+    public override convenience init(width: Int, height: Int, frameRate: Double) {
+        self.init(width: width, height: height, frameRate: frameRate, maxConstantsSize: 1024 * 1024 * 3)
+    }
+    
+    public init(width: Int, height: Int, frameRate: Double, maxConstantsSize: Int = 1024 * 1024 * 3) {
+        self.maxConstantsSize = maxConstantsSize
+        
         super.init(width: width, height: height, frameRate: frameRate)
         
         let device = renderer.metalDevice
@@ -166,7 +172,7 @@ open class Solution3DContext: SolutionContext {
         commandQueue = device.makeCommandQueue()!
         commandQueue.label = "Solution 3D Command Queue"
         
-        constantBuffer = device.makeBuffer(length: MaxConstantsSize, options: .storageModeShared)!
+        constantBuffer = device.makeBuffer(length: maxConstantsSize, options: .storageModeShared)!
         constantBuffer.label = "Solution 3D Constant Buffer"
         
         let bundle = Bundle(for: Solution3DContext.self)
@@ -529,6 +535,10 @@ open class Solution3DContext: SolutionContext {
         
         nodesTable.removeValue(forKey: name)
         nodes.removeAll(where: { $0 === node })
+        
+        if let batch = node.batch {
+            batchNodes[batch]?.removeAll(where: { $0 === node })
+        }
     }
     
     public func updateNode(name: String, transform: simd_float4x4? = nil, submeshIndex: Int = 0, materialIndex: Int = 0, baseColor: SIMD4<Float>? = nil, metallicFactor: Float? = nil, roughnessFactor: Float? = nil, emissiveColor: SIMD4<Float>? = nil, opacity: Float? = nil) {
@@ -549,6 +559,7 @@ open class Solution3DContext: SolutionContext {
     
     public func addDirectLight(name: String, lookAt target: SIMD3<Float>, from origin: SIMD3<Float>, up: SIMD3<Float>, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), intensity: Float = 1.0) {
         let light = SolutionLight()
+        light.name = name
         light.type = .directional
         light.worldTransform = simd_float4x4(lookAt: target, from: origin, up: up)
         light.color = color
@@ -560,6 +571,7 @@ open class Solution3DContext: SolutionContext {
     
     public func addPointLight(name: String, color: SIMD3<Float> = SIMD3<Float>(1, 1, 1), intensity: Float = 1.0) {
         let light = SolutionLight()
+        light.name = name
         light.type = .omni
         light.color = color
         light.intensity = intensity
@@ -776,8 +788,8 @@ open class Solution3DContext: SolutionContext {
         
         let totalAllocations = lightAllocations + frameAllocations + nodesAllocations
         
-        if totalAllocations > MaxConstantsSize / MaxOutstandingFrameCount {
-            fatalError("Insufficient constant storage: frame consumed \(totalAllocations) bytes of total \(MaxConstantsSize) bytes")
+        if totalAllocations > maxConstantsSize / MaxOutstandingFrameCount {
+            fatalError("Insufficient constant storage: frame consumed \(totalAllocations) bytes of total \(maxConstantsSize) bytes")
         } else {
             // print("Allocated \(totalAllocations) inside of \(MaxConstantsSize / MaxOutstandingFrameCount)")
         }
@@ -863,8 +875,8 @@ open class Solution3DContext: SolutionContext {
     private func updateNodeConstants() -> Int {
         nodeConstantsOffset.removeAll(keepingCapacity: true)
 
-        var singleAllocation = updateNodeConstantsSingle()
-        var batchAllocation = updateNodeConstantsBatched()
+        let singleAllocation = updateNodeConstantsSingle()
+        let batchAllocation = updateNodeConstantsBatched()
         
         return singleAllocation + batchAllocation
     }
@@ -975,7 +987,7 @@ open class Solution3DContext: SolutionContext {
         let effectiveAlignment = lcm(alignment, MinBufferAlignment)
         var allocationOffset = align(currentConstantBufferOffset, upTo: effectiveAlignment)
         
-        if (allocationOffset + size >= MaxConstantsSize) {
+        if (allocationOffset + size >= maxConstantsSize) {
             allocationOffset = 0
         }
         
