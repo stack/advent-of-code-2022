@@ -148,7 +148,7 @@ struct Day15 {
     
     static func main() async {
         let clock = ContinuousClock()
-        let format: Duration.UnitsFormatStyle = .units(allowed: [.milliseconds], fractionalPart: .show(length: 5))
+        let format: Duration.UnitsFormatStyle = .units(allowed: [.seconds, .milliseconds], fractionalPart: .show(length: 5))
         
         let sampleSolver = Solver(data: SampleData)
         let inputSolver = Solver(data: InputData)
