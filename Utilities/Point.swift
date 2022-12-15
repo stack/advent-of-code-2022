@@ -45,8 +45,23 @@ public struct Point: Hashable {
     public static var zero: Point {
         return Point(x: 0, y: 0)
     }
+    
+    public func manhattenDistance(to other: Point) -> Int {
+        return abs(x - other.x) + abs(y - other.y)
+    }
 }
 
+extension Point: Comparable {
+    public static func < (lhs: Point, rhs: Point) -> Bool {
+        if lhs.x < rhs.x {
+            return true
+        } else if lhs.x > rhs.x {
+            return false
+        } else {
+            return lhs.y < rhs.y
+        }
+    }
+}
 extension Point: CustomDebugStringConvertible {
     public var debugDescription: String {
         "(\(x),\(y))"
