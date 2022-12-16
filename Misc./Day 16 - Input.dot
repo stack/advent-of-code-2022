@@ -1,0 +1,105 @@
+digraph G {
+    GS [label = "GS (0)"]
+    CB [label = "CB (0)"]
+    TP [label = "TP (0)"]
+    FI [label = "FI (3)"]
+    WV [label = "WV (0)"]
+    EA [label = "EA (16)"]
+    AT [label = "AT (9)"]
+    WS [label = "WS (0)"]
+    MP [label = "MP (0)"]
+    GE [label = "GE (0)"]
+    SA [label = "SA (10)"]
+    NI [label = "NI (0)"]
+    GO [label = "GO (0)"]
+    IT [label = "IT (0)"]
+    NG [label = "NG (0)"]
+    RD [label = "RD (0)"]
+    LR [label = "LR (12)"]
+    TO [label = "TO (22)"]
+    WF [label = "WF (0)"]
+    YD [label = "YD (21)"]
+    XR [label = "XR (0)"]
+    KF [label = "KF (0)"]
+    OO [label = "OO (0)"]
+    HG [label = "HG (0)"]
+    CT [label = "CT (0)"]
+    DA [label = "DA (0)"]
+    YY [label = "YY (0)"]
+    VW [label = "VW (0)"]
+    RC [label = "RC (0)"]
+    PL [label = "PL (0)"]
+    TH [label = "TH (14)"]
+    QN [label = "QN (24)"]
+    XE [label = "XE (0)"]
+    XP [label = "XP (0)"]
+    AX [label = "AX (0)"]
+    EM [label = "EM (0)"]
+    NR [label = "NR (0)"]
+    YG [label = "YG (4)"]
+    PM [label = "PM (0)"]
+    AY [label = "AY (0)"]
+    GJ [label = "GJ (0)"]
+    LC [label = "LC (0)"]
+    UD [label = "UD (17)"]
+    AA [label = "AA (0)"]
+    OM [label = "OM (0)"]
+    WB [label = "WB (0)"]
+    GW [label = "GW (11)"]
+    NA [label = "NA (7)"]
+    XX [label = "XX (20)"]
+    ZO [label = "ZO (0)"]
+    KB [label = "KB (8)"]
+
+    GS -> KB, GW
+    CB -> GW, CT
+    TP -> LR, TH
+    FI -> DA, AY, ZO, MP, XP
+    WV -> TH, HG
+    EA -> PL, NG, AX
+    AT -> ZO, EM
+    WS -> GW, RD
+    MP -> AA, FI
+    GE -> AX, QN
+    SA -> NI, OM, RD, RC, GO
+    NI -> SA, YG
+    GO -> TH, SA
+    IT -> WB, KB
+    NG -> EA, KF
+    RD -> SA, WS
+    LR -> TP, XR
+    TO -> VW
+    WF -> XX, OO
+    YD -> NR
+    XR -> LR, KB
+    KF -> GW, NG
+    OO -> UD, WF
+    HG -> WV, YG
+    CT -> YG, CB
+    DA -> TH, FI
+    YY -> AA, YG
+    VW -> TO, EM
+    RC -> AA, SA
+    PL -> AA, EA
+    TH -> GO, WV, GJ, DA, TP
+    QN -> LC, GE
+    XE -> NA, XX
+    XP -> FI, OM
+    AX -> GE, EA
+    EM -> AT, VW
+    NR -> YD, PM
+    YG -> AY, HG, NI, YY, CT
+    PM -> UD, NR
+    AY -> YG, FI
+    GJ -> AA, TH
+    LC -> QN, GW
+    UD -> OO, PM
+    AA -> MP, GJ, YY, RC, PL
+    OM -> XP, SA
+    WB -> NA, IT
+    GW -> KF, GS, LC, CB, WS
+    NA -> WB, XE
+    XX -> XE, WF
+    ZO -> AT, FI
+    KB -> XR, GS, IT
+}
