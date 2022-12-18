@@ -9,6 +9,17 @@
 import Foundation
 import Utilities
 
+struct StateKey: Hashable {
+    let rows: [[Int]]
+    let directionIndex: Int
+    let tetrominoIndex: Int
+}
+
+struct StateValue {
+    let index: Int
+    let height: Int
+}
+
 enum Direction {
     case left
     case right
@@ -20,16 +31,6 @@ enum Tetromino {
     case angle
     case line
     case box
-    
-    var next: Tetromino {
-        switch self {
-        case .minus: return .plus
-        case .plus:  return .angle
-        case .angle: return .line
-        case .line:  return .box
-        case .box:   return .minus
-        }
-    }
     
     func points(from origin: Int) -> [Point] {
         switch self {
@@ -79,14 +80,17 @@ class Cave {
     let directions: [Direction]
     private(set) var directionIndex: Int = 0
     
-    private(set) var tetromino: Tetromino = .minus
+    let tetrominos: [Tetromino] = [.minus, .plus, .angle, .line, .box]
+    private(set) var tetrominoIndex: Int = 0
     private(set) var tetrominoPoints: [Point] = []
     
     let width: Int
     private(set) var usedSpace: [[Int]] = []
     private(set) var usedSpaceSet: Set<Point> = []
     private(set) var highestPoint: Int = 0
-    private(set) var patternRange: ClosedRange<Int>? = nil
+    
+    private(set) var cache: [StateKey:StateValue] = [:]
+    private(set) var hasJumped: Bool = false
     
     let shouldPrint: Bool
     
@@ -113,7 +117,7 @@ class Cave {
         for point in nextPoints {
             if isUsed(point) || point.y == -1 {
                 for newPoint in tetrominoPoints {
-                    if patternRange == nil {
+                    if !hasJumped {
                         while usedSpace.count <= newPoint.y {
                             usedSpace.append([])
                         }
@@ -127,12 +131,6 @@ class Cave {
                 }
                 
                 didInsert = true
-                
-                if let patternRange {
-                    let lowestPoint = (highestPoint - patternRange.count - 50)
-                    
-                    usedSpaceSet = usedSpaceSet.filter { $0.y >= lowestPoint }
-                }
                 
                 break
             }
@@ -200,18 +198,26 @@ class Cave {
     func run(totalRocks: Int) {
         directionIndex = 0
         
-        tetromino = .minus
+        tetrominoIndex = 0
         tetrominoPoints = []
         
         usedSpace.removeAll()
         usedSpaceSet.removeAll()
         
         highestPoint = -1
-        patternRange = nil
+        cache.removeAll()
+        hasJumped = false
         
-        for rock in 0 ..< totalRocks {
+        var rock = 0
+        
+        while rock < totalRocks {
+            let previousDirectionIndex = directionIndex
+            let previousTetrominoIndex = tetrominoIndex
+            
+            let tetromino = tetrominos[tetrominoIndex]
+            tetrominoIndex = (tetrominoIndex + 1) % tetrominos.count
+            
             tetrominoPoints = tetromino.points(from: highestPoint + 1)
-            tetromino = tetromino.next
             
             if shouldPrint {
                 print("== Start ==")
@@ -227,37 +233,44 @@ class Cave {
                     break
                 }
             }
-            
-            if patternRange == nil,  let pattern = findPattern() {
-                print("!!! Found pattern: \(pattern)")
+
+            if !hasJumped {
+                let key = StateKey(rows: usedSpace.suffix(5), directionIndex: previousDirectionIndex, tetrominoIndex: previousTetrominoIndex)
+                let value = StateValue(index: rock, height: highestPoint)
                 
-                patternRange = pattern
-            }
-        }
-        
-        printState()
-    }
-    
-    private func findPattern() -> ClosedRange<Int>? {
-        guard highestPoint > 10 else { return nil }
-        
-        for rangeHeight in (3 ..< (highestPoint / 2)).reversed() {
-            let maxY = highestPoint - (rangeHeight * 2)
-            
-            for y in 0 ... maxY {
-                let lhsRange = y ... (y + rangeHeight - 1)
-                let rhsRange = (y + rangeHeight) ... (y + rangeHeight + rangeHeight - 1)
-                
-                let lhs = usedSpace[lhsRange]
-                let rhs = usedSpace[rhsRange]
-                
-                if lhs == rhs {
-                    return lhsRange
+                if let existingValue = cache[key] {
+                    let cycleLength = value.index - existingValue.index
+                    let heightIncrease = value.height - existingValue.height
+                    
+                    print("Cycle of \(cycleLength) rocks begins at index \(existingValue.index), height \(existingValue.height), increasing by \(heightIncrease)")
+                    
+                    let existingRange = (existingValue.height + 1) ... value.height
+                    
+                    let cycleDifference = totalRocks - existingValue.index
+                    let fullCycles = cycleDifference / cycleLength
+                    
+                    rock = existingValue.index + (cycleLength * fullCycles)
+                    highestPoint = existingValue.height + (heightIncrease * fullCycles)
+                    
+                    usedSpaceSet.removeAll(keepingCapacity: true)
+                    
+                    for y in existingRange {
+                        for x in usedSpace[y] {
+                            let pointY = highestPoint - heightIncrease + (y - existingRange.lowerBound) + 1
+                            
+                            let point = Point(x: x, y: pointY)
+                            usedSpaceSet.insert(point)
+                        }
+                    }
+                    
+                    hasJumped = true
+                } else {
+                    cache[key] = value
                 }
             }
+            
+            rock += 1
         }
-        
-        return nil
     }
     
     private func printState(onlyUsed: Bool = false) {
