@@ -62,6 +62,7 @@ extension Point: Comparable {
         }
     }
 }
+
 extension Point: CustomDebugStringConvertible {
     public var debugDescription: String {
         "(\(x),\(y))"
