@@ -39,6 +39,14 @@ public struct Point3D: Hashable {
     public func manhattenDistance(to other: Point3D) -> Int {
         return abs(x - other.x) + abs(y - other.y) + abs(z - other.z)
     }
+    
+    public static func +(lhs: Point3D, rhs: Point3D) -> Point3D {
+        return Point3D(x: lhs.x + rhs.x, y: lhs.y + rhs.y, z: lhs.z + rhs.z)
+    }
+    
+    public static func -(lhs: Point3D, rhs: Point3D) -> Point3D {
+        return Point3D(x: lhs.x - rhs.x, y: lhs.y - rhs.y, z: lhs.z - rhs.z)
+    }
 }
 
 extension Point3D: Comparable {

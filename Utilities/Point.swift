@@ -49,6 +49,14 @@ public struct Point: Hashable {
     public func manhattenDistance(to other: Point) -> Int {
         return abs(x - other.x) + abs(y - other.y)
     }
+    
+    public static func +(lhs: Point, rhs: Point) -> Point {
+        return Point(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    }
+    
+    public static func -(lhs: Point, rhs: Point) -> Point {
+        return Point(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
+    }
 }
 
 extension Point: Comparable {
